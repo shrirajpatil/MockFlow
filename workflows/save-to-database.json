@@ -1,0 +1,115 @@
+{
+    "name": "Save to Database",
+    "description": "Validate input and save to database with confirmation",
+    "version": "1.0.0",
+    "nodes": [
+        {
+            "id": "request-1",
+            "type": "request",
+            "position": {
+                "x": 100,
+                "y": 100
+            },
+            "data": {
+                "label": "Receive Data",
+                "type": "request",
+                "method": "POST",
+                "path": "/api/save",
+                "bodySchema": "{\"name\": \"string\", \"email\": \"string\", \"data\": \"object\"}"
+            }
+        },
+        {
+            "id": "validation-1",
+            "type": "validation",
+            "position": {
+                "x": 100,
+                "y": 250
+            },
+            "data": {
+                "label": "Validate Input",
+                "type": "validation",
+                "rules": [
+                    {
+                        "field": "name",
+                        "condition": "required",
+                        "errorMessage": "Name is required"
+                    },
+                    {
+                        "field": "email",
+                        "condition": "required",
+                        "errorMessage": "Email is required"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "transform-1",
+            "type": "transformation",
+            "position": {
+                "x": 100,
+                "y": 400
+            },
+            "data": {
+                "label": "Format Record",
+                "type": "transformation",
+                "transformations": [
+                    {
+                        "target": "record.id",
+                        "source": "uuid()",
+                        "transform": ""
+                    },
+                    {
+                        "target": "record.name",
+                        "source": "request.body.name",
+                        "transform": ""
+                    },
+                    {
+                        "target": "record.email",
+                        "source": "request.body.email",
+                        "transform": ""
+                    },
+                    {
+                        "target": "record.created_at",
+                        "source": "now()",
+                        "transform": ""
+                    }
+                ]
+            }
+        },
+        {
+            "id": "response-1",
+            "type": "response",
+            "position": {
+                "x": 100,
+                "y": 550
+            },
+            "data": {
+                "label": "Return Success",
+                "type": "response",
+                "statusCode": 201,
+                "headers": [],
+                "bodyTemplate": "{\"success\": true, \"record\": \"{{record}}\", \"message\": \"Data saved successfully\"}"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "id": "e1-2",
+            "source": "request-1",
+            "target": "validation-1",
+            "type": "default"
+        },
+        {
+            "id": "e2-3",
+            "source": "validation-1",
+            "target": "transform-1",
+            "type": "default"
+        },
+        {
+            "id": "e3-4",
+            "source": "transform-1",
+            "target": "response-1",
+            "type": "default"
+        }
+    ]
+}

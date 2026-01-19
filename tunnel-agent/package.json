@@ -1,0 +1,29 @@
+{
+  "name": "tunnel-agent",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node cli.js start",
+    "stop": "node cli.js stop",
+    "status": "node cli.js status",
+    "restart": "node cli.js restart"
+  },
+  "keywords": [
+    "tunnel",
+    "ngrok",
+    "mockflow"
+  ],
+  "author": "",
+  "license": "ISC",
+  "description": "Tunnel agent for exposing MockFlow via ngrok",
+  "dependencies": {
+    "@ngrok/ngrok": "^1.4.1",
+    "axios": "^1.13.2",
+    "chalk": "^5.3.0",
+    "commander": "^14.0.2",
+    "dotenv": "^17.2.3",
+    "eventsource": "^4.1.0",
+    "qrcode-terminal": "^0.12.0"
+  }
+}

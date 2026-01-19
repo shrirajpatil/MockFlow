@@ -1,0 +1,102 @@
+{
+    "name": "CRUD Operations",
+    "description": "Complete Create, Read, Update, Delete workflow",
+    "version": "1.0.0",
+    "nodes": [
+        {
+            "id": "request-1",
+            "type": "request",
+            "position": {
+                "x": 100,
+                "y": 100
+            },
+            "data": {
+                "label": "API Request",
+                "type": "request",
+                "method": "POST",
+                "path": "/api/items",
+                "bodySchema": "{\"name\": \"string\", \"description\": \"string\"}"
+            }
+        },
+        {
+            "id": "conditional-1",
+            "type": "conditional",
+            "position": {
+                "x": 100,
+                "y": 250
+            },
+            "data": {
+                "label": "Check Method",
+                "type": "conditional",
+                "condition": "request.method === 'POST'",
+                "trueLabel": "Create",
+                "falseLabel": "Other"
+            }
+        },
+        {
+            "id": "transform-create",
+            "type": "transformation",
+            "position": {
+                "x": 50,
+                "y": 400
+            },
+            "data": {
+                "label": "Create Item",
+                "type": "transformation",
+                "transformations": [
+                    {
+                        "target": "item.id",
+                        "source": "uuid()",
+                        "transform": ""
+                    },
+                    {
+                        "target": "item.name",
+                        "source": "request.body.name",
+                        "transform": ""
+                    },
+                    {
+                        "target": "item.created_at",
+                        "source": "now()",
+                        "transform": ""
+                    }
+                ]
+            }
+        },
+        {
+            "id": "response-1",
+            "type": "response",
+            "position": {
+                "x": 100,
+                "y": 550
+            },
+            "data": {
+                "label": "Return Result",
+                "type": "response",
+                "statusCode": 201,
+                "headers": [],
+                "bodyTemplate": "{\"success\": true, \"item\": \"{{item}}\"}"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "id": "e1-2",
+            "source": "request-1",
+            "target": "conditional-1",
+            "type": "default"
+        },
+        {
+            "id": "e2-3",
+            "source": "conditional-1",
+            "target": "transform-create",
+            "type": "default",
+            "label": "true"
+        },
+        {
+            "id": "e3-4",
+            "source": "transform-create",
+            "target": "response-1",
+            "type": "default"
+        }
+    ]
+}

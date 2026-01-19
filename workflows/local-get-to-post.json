@@ -1,0 +1,75 @@
+{
+    "name": "Local GET to MockFlow POST",
+    "description": "Fetch data from local API and create resource on MockFlow",
+    "version": "1.0.0",
+    "nodes": [
+        {
+            "id": "request-1",
+            "type": "request",
+            "position": {
+                "x": 100,
+                "y": 100
+            },
+            "data": {
+                "label": "Get User from Local API",
+                "type": "request",
+                "method": "GET",
+                "path": "https://YOUR-NGROK-URL.ngrok-free.app/api/users/1",
+                "headers": []
+            }
+        },
+        {
+            "id": "transform-1",
+            "type": "transformation",
+            "position": {
+                "x": 100,
+                "y": 250
+            },
+            "data": {
+                "label": "Transform User Data",
+                "type": "transformation",
+                "transformations": [
+                    {
+                        "target": "user.name",
+                        "source": "response.name",
+                        "transform": ""
+                    },
+                    {
+                        "target": "user.email",
+                        "source": "response.email",
+                        "transform": ""
+                    }
+                ]
+            }
+        },
+        {
+            "id": "response-1",
+            "type": "response",
+            "position": {
+                "x": 100,
+                "y": 400
+            },
+            "data": {
+                "label": "Return Success",
+                "type": "response",
+                "statusCode": 201,
+                "headers": [],
+                "bodyTemplate": "{\"success\": true, \"user\": \"{{user}}\", \"source\": \"local-api\"}"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "id": "e1-2",
+            "source": "request-1",
+            "target": "transform-1",
+            "type": "default"
+        },
+        {
+            "id": "e2-3",
+            "source": "transform-1",
+            "target": "response-1",
+            "type": "default"
+        }
+    ]
+}

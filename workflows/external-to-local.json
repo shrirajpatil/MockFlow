@@ -1,0 +1,106 @@
+{
+    "name": "External API to Local",
+    "description": "Fetch from external API, transform, and save locally",
+    "version": "1.0.0",
+    "nodes": [
+        {
+            "id": "request-1",
+            "type": "request",
+            "position": {
+                "x": 100,
+                "y": 100
+            },
+            "data": {
+                "label": "Fetch External Data",
+                "type": "request",
+                "method": "GET",
+                "path": "https://jsonplaceholder.typicode.com/users/1",
+                "headers": []
+            }
+        },
+        {
+            "id": "transform-1",
+            "type": "transformation",
+            "position": {
+                "x": 100,
+                "y": 250
+            },
+            "data": {
+                "label": "Map to Local Schema",
+                "type": "transformation",
+                "transformations": [
+                    {
+                        "target": "user.full_name",
+                        "source": "response.name",
+                        "transform": ""
+                    },
+                    {
+                        "target": "user.email_address",
+                        "source": "response.email",
+                        "transform": ""
+                    },
+                    {
+                        "target": "user.company",
+                        "source": "response.company.name",
+                        "transform": ""
+                    },
+                    {
+                        "target": "user.imported_at",
+                        "source": "now()",
+                        "transform": ""
+                    }
+                ]
+            }
+        },
+        {
+            "id": "request-2",
+            "type": "request",
+            "position": {
+                "x": 100,
+                "y": 400
+            },
+            "data": {
+                "label": "Save to Local API",
+                "type": "request",
+                "method": "POST",
+                "path": "https://YOUR-NGROK-URL.ngrok-free.app/api/users",
+                "bodySchema": "{{user}}"
+            }
+        },
+        {
+            "id": "response-1",
+            "type": "response",
+            "position": {
+                "x": 100,
+                "y": 550
+            },
+            "data": {
+                "label": "Return Success",
+                "type": "response",
+                "statusCode": 201,
+                "headers": [],
+                "bodyTemplate": "{\"imported\": true, \"user\": \"{{user}}\", \"source\": \"external-api\"}"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "id": "e1-2",
+            "source": "request-1",
+            "target": "transform-1",
+            "type": "default"
+        },
+        {
+            "id": "e2-3",
+            "source": "transform-1",
+            "target": "request-2",
+            "type": "default"
+        },
+        {
+            "id": "e3-4",
+            "source": "request-2",
+            "target": "response-1",
+            "type": "default"
+        }
+    ]
+}

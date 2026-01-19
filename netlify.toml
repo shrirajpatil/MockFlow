@@ -1,0 +1,25 @@
+[build]
+  command = "cd frontend && npm install && npm run build"
+  publish = "frontend/.next"
+  functions = "backend/netlify/functions"
+
+# The Backend API - Redirects /api to our Execute function
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/execute"
+  status = 200
+  force = true
+
+# The Proxy API - Used for external API calls in Editor
+[[redirects]]
+  from = "/backend/proxy"
+  to = "/.netlify/functions/proxy"
+  status = 200
+  force = true
+
+# The Health API - Monitoring
+[[redirects]]
+  from = "/backend/health"
+  to = "/.netlify/functions/health"
+  status = 200
+  force = true
