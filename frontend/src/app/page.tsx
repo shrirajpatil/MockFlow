@@ -172,7 +172,6 @@ export default function LandingPage() {
             <div className="hidden md:flex items-center gap-6 text-sm text-indigo-300/60">
               <Link href="/editor" className="hover:text-white transition-colors">Editor</Link>
               <Link href="/workflows" className="hover:text-white transition-colors">Workflows</Link>
-              <Link href="https://github.com/shrirajpatil/MockFlow#readme" target="_blank" className="hover:text-white transition-colors">Docs</Link>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -202,7 +201,7 @@ export default function LandingPage() {
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-sm text-indigo-300 hover:border-indigo-500/40 transition-all mb-10 group"
           >
             <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-            Free and open source
+            Now in beta
             <ChevronRight className="w-4 h-4 text-indigo-400 group-hover:translate-x-0.5 transition-transform" />
           </Link>
 
@@ -244,12 +243,11 @@ export default function LandingPage() {
               </Button>
             </Link>
             <Link
-              href="https://github.com/shrirajpatil/MockFlow"
-              target="_blank"
+              href="/workflows"
               className="flex items-center gap-2 px-6 py-3 text-sm text-indigo-200/60 hover:text-white border border-indigo-500/20 rounded-xl hover:border-indigo-500/40 hover:bg-indigo-500/10 transition-all"
             >
               <Terminal className="w-4 h-4" />
-              View on GitHub
+              View my workflows
             </Link>
           </div>
 
