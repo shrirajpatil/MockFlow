@@ -26,6 +26,8 @@ export function getRedisClient(): Redis | null {
 
 // Configuration
 const WORKFLOW_TTL = parseInt(process.env.REDIS_WORKFLOW_TTL || '3600'); // 1 hour
+const DEPLOYED_TTL = parseInt(process.env.REDIS_DEPLOYED_TTL || '60'); // short TTL doubles as invalidation
+const STATE_TTL = parseInt(process.env.REDIS_STATE_TTL || '3600'); // 1 hour
 const RATELIMIT_MAX = parseInt(process.env.REDIS_RATELIMIT_MAX || '100'); // 100 requests
 const RATELIMIT_WINDOW = parseInt(process.env.REDIS_RATELIMIT_WINDOW || '60'); // 60 seconds
 const API_CACHE_TTL = parseInt(process.env.REDIS_API_CACHE_TTL || '300'); // 5 minutes
@@ -82,48 +84,76 @@ export async function invalidateWorkflowCache(workflowId: string): Promise<void>
 }
 
 /**
- * Cache deployed workflow lookup
+ * Cache the full workflow JSON for a deployed route. Short TTL (default 60s)
+ * doubles as invalidation after save/deploy/undeploy.
  */
 export async function cacheDeployedWorkflow(
     workspace: string,
     method: string,
     path: string,
-    workflowId: string
+    workflow: any
 ): Promise<void> {
     const redis = getRedisClient();
     if (!redis) return;
 
     try {
         const key = `deployed:${workspace}:${method}:${path}`;
-        await redis.setex(key, WORKFLOW_TTL, workflowId);
-        console.log(`[Redis] Cached deployed workflow: ${key} -> ${workflowId}`);
+        await redis.setex(key, DEPLOYED_TTL, JSON.stringify(workflow));
     } catch (error) {
         console.error('[Redis] Error caching deployed workflow:', error);
     }
 }
 
 /**
- * Get deployed workflow ID from cache
+ * Get the cached workflow for a deployed route
  */
 export async function getCachedDeployedWorkflow(
     workspace: string,
     method: string,
     path: string
-): Promise<string | null> {
+): Promise<any | null> {
     const redis = getRedisClient();
     if (!redis) return null;
 
     try {
         const key = `deployed:${workspace}:${method}:${path}`;
-        const workflowId = await redis.get(key);
-        if (workflowId) {
-            console.log(`[Redis] Cache hit for deployed workflow: ${key}`);
-            return workflowId as string;
+        const cached = await redis.get(key);
+        if (cached) {
+            return typeof cached === 'string' ? JSON.parse(cached) : cached;
         }
         return null;
     } catch (error) {
         console.error('[Redis] Error getting cached deployed workflow:', error);
         return null;
+    }
+}
+
+/**
+ * Persistent state for State nodes, namespaced per workspace.
+ * Enables stateful mocks across requests (e.g. POST then GET a resource).
+ */
+export async function getWorkflowState(workspace: string, key: string): Promise<any> {
+    const redis = getRedisClient();
+    if (!redis) return undefined;
+
+    try {
+        const value = await redis.get(`state:${workspace}:${key}`);
+        if (value === null || value === undefined) return undefined;
+        return typeof value === 'string' ? JSON.parse(value) : value;
+    } catch (error) {
+        console.error('[Redis] Error reading workflow state:', error);
+        return undefined;
+    }
+}
+
+export async function setWorkflowState(workspace: string, key: string, value: any): Promise<void> {
+    const redis = getRedisClient();
+    if (!redis) return;
+
+    try {
+        await redis.setex(`state:${workspace}:${key}`, STATE_TTL, JSON.stringify(value ?? null));
+    } catch (error) {
+        console.error('[Redis] Error writing workflow state:', error);
     }
 }
 

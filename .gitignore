@@ -27,6 +27,9 @@ backend/.env
 .DS_Store
 Thumbs.db
 
+# Local agent/tooling config
+.claude/
+
 # Deployment Bundles
 MockFlow-Deploy/
 MockFlow-Deploy.zip

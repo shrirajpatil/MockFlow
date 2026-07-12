@@ -4,8 +4,10 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Save, Play, Download, Upload, Trash2, Undo2, Redo2, FileJson, Keyboard, Rocket, Copy, CheckCircle2, Database, Zap } from 'lucide-react';
 import useStore from '@/store/useStore';
-import { WorkflowExecutor } from '@/lib/executor';
-import { saveWorkflow, updateWorkflow, deployWorkflow, undeployWorkflow } from '@/lib/api';
+import { WorkflowExecutor } from '@/lib/productionExecutor';
+import { saveWorkflow, updateWorkflow, deployWorkflow, undeployWorkflow, loadWorkflow } from '@/lib/api';
+import { templates } from '@/lib/templates';
+import { useToast } from '@/hooks/use-toast';
 import WorkspaceTunnelSettings from '@/components/WorkspaceTunnelSettings';
 import {
     Dialog,
@@ -28,10 +30,15 @@ import {
 
 export default function Toolbar() {
     const { nodes, edges, setNodes, setEdges, undo, redo, canUndo, canRedo } = useStore();
+    const { toast } = useToast();
     const [testDialogOpen, setTestDialogOpen] = useState(false);
     const [saveDialogOpen, setSaveDialogOpen] = useState(false);
     const [workspaceDialogOpen, setWorkspaceDialogOpen] = useState(false);
     const [shortcutsDialogOpen, setShortcutsDialogOpen] = useState(false);
+    const [templatesDialogOpen, setTemplatesDialogOpen] = useState(false);
+    const [deployDialogOpen, setDeployDialogOpen] = useState(false);
+    const [tryItResult, setTryItResult] = useState<string | null>(null);
+    const [tryingIt, setTryingIt] = useState(false);
     const [testRequest, setTestRequest] = useState('{\n  "name": "John Doe",\n  "email": "john@example.com"\n}');
     const [testResult, setTestResult] = useState<any>(null);
     const [testLogs, setTestLogs] = useState<string[]>([]);
@@ -58,9 +65,31 @@ export default function Toolbar() {
         if (savedWorkspace) {
             setWorkspace(savedWorkspace);
         } else {
-            // Show workspace dialog if no workspace set
+            // Suggest a random, hard-to-guess workspace name (it namespaces your data)
+            setTempWorkspace(`ws-${Math.random().toString(36).slice(2, 8)}`);
             setWorkspaceDialogOpen(true);
         }
+    }, []);
+
+    // Open an existing workflow via /editor?id=... (from the workflows page)
+    useEffect(() => {
+        const id = new URLSearchParams(window.location.search).get('id');
+        if (!id) return;
+
+        (async () => {
+            const workflow = await loadWorkflow(id);
+            if (!workflow) {
+                toast({ title: 'Workflow not found', variant: 'destructive' });
+                return;
+            }
+            setNodes(workflow.nodes || []);
+            setEdges(workflow.edges || []);
+            setWorkflowId(workflow.id);
+            setWorkflowName(workflow.name);
+            setWorkflowDescription(workflow.description || '');
+            setIsDeployed(!!workflow.deployed);
+        })();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
@@ -122,7 +151,7 @@ export default function Toolbar() {
         }
 
         if (!workspace) {
-            alert('Please set a workspace first');
+            toast({ title: 'Set a workspace first', description: 'Your workspace namespaces your workflows and API URLs.' });
             setWorkspaceDialogOpen(true);
             return;
         }
@@ -140,7 +169,8 @@ export default function Toolbar() {
                     workspace,
                 });
                 if (result) {
-                    alert('Workflow updated successfully!');
+                    toast({ title: 'Workflow updated' });
+                    setSaveDialogOpen(false);
                 }
             } else {
                 // Save new workflow
@@ -154,12 +184,12 @@ export default function Toolbar() {
                 if (result) {
                     setWorkflowId(result.id);
                     setIsDeployed(result.deployed);
-                    alert('Workflow saved successfully!');
+                    toast({ title: 'Workflow saved' });
                     setSaveDialogOpen(false);
                 }
             }
-        } catch (error) {
-            alert('Failed to save workflow');
+        } catch (error: any) {
+            toast({ title: 'Failed to save workflow', description: error.message, variant: 'destructive' });
         } finally {
             setSaving(false);
         }
@@ -167,7 +197,7 @@ export default function Toolbar() {
 
     const handleDeploy = async () => {
         if (!workflowId) {
-            alert('Please save the workflow first');
+            toast({ title: 'Save the workflow first', description: 'Deploy publishes the last saved version.' });
             return;
         }
 
@@ -177,25 +207,54 @@ export default function Toolbar() {
                 const success = await undeployWorkflow(workflowId);
                 if (success) {
                     setIsDeployed(false);
-                    alert('Workflow undeployed successfully');
+                    toast({ title: 'Workflow undeployed', description: 'The endpoint is no longer served.' });
                 }
             } else {
                 const success = await deployWorkflow(workflowId);
                 if (success) {
                     setIsDeployed(true);
-                    alert('Workflow deployed successfully!');
+                    setTryItResult(null);
+                    setDeployDialogOpen(true);
                 }
             }
-        } catch (error) {
-            alert('Failed to deploy workflow');
+        } catch (error: any) {
+            toast({ title: 'Deploy failed', description: error.message, variant: 'destructive' });
         } finally {
             setDeploying(false);
         }
     };
 
+    const handleTryIt = async () => {
+        const url = getEndpointUrl();
+        if (!url) return;
+
+        const requestNode = nodes.find(n => n.type === 'request');
+        const method = (requestNode?.data as any)?.method || 'GET';
+
+        setTryingIt(true);
+        setTryItResult(null);
+        try {
+            const response = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: method === 'GET' || method === 'DELETE' ? undefined : testRequest,
+            });
+            const text = await response.text();
+            let pretty = text;
+            try {
+                pretty = JSON.stringify(JSON.parse(text), null, 2);
+            } catch { /* keep raw */ }
+            setTryItResult(`HTTP ${response.status}\n\n${pretty}`);
+        } catch (error: any) {
+            setTryItResult(`Request failed: ${error.message}\n\nNote: deployed endpoints are served by Netlify Functions — run "netlify dev" locally or use your deployed site URL.`);
+        } finally {
+            setTryingIt(false);
+        }
+    };
+
     const handleTest = async () => {
         if (nodes.length === 0) {
-            alert('No nodes to test. Please add nodes to your workflow first.');
+            toast({ title: 'Nothing to test', description: 'Add nodes to your workflow first.' });
             return;
         }
 
@@ -204,115 +263,38 @@ export default function Toolbar() {
         setTestLogs([]);
         setTesting(true);
 
-        const logs: string[] = [];
-        const addLog = (message: string) => {
-            const timestamp = new Date().toISOString();
-            const logMessage = `[${timestamp}] ${message}`;
-            logs.push(logMessage);
-            setTestLogs([...logs]);
-        };
-
         try {
             const requestNode = nodes.find(n => n.type === 'request');
-
             if (!requestNode) {
-                addLog('❌ No Request node found');
                 setTestResult({ success: false, error: 'No Request node found' });
-                setTesting(false);
+                return;
+            }
+            const requestData = requestNode.data as any;
+
+            let body: any = null;
+            try {
+                body = testRequest.trim() ? JSON.parse(testRequest) : null;
+            } catch {
+                setTestResult({ success: false, error: 'Request body is not valid JSON' });
                 return;
             }
 
-            const requestData = requestNode.data as any;
-            addLog(`Starting test from Request node: ${requestData.label || 'Request'}`);
-
-            // Check if this is an external API call (has full URL)
-            const isExternalAPI = requestData.path && (requestData.path.startsWith('http://') || requestData.path.startsWith('https://'));
-
-            if (isExternalAPI) {
-                // Call external API
-                addLog(`🌐 Calling external API: ${requestData.method || 'GET'} ${requestData.path}`);
-
-                const startTime = Date.now();
-
-                try {
-                    const requestBody = requestData.bodySchema ? JSON.parse(requestData.bodySchema) : undefined;
-
-                    const response = await fetch(requestData.path, {
-                        method: requestData.method || 'GET',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            ...(requestData.headers || {})
-                        },
-                        body: requestBody ? JSON.stringify(requestBody) : undefined
-                    });
-
-                    const executionTime = Date.now() - startTime;
-                    const responseData = await response.json();
-
-                    addLog(`✅ Response received: ${response.status} ${response.statusText}`);
-                    addLog(`⏱️ Execution time: ${executionTime}ms`);
-
-                    setTestResult({
-                        success: response.ok,
-                        statusCode: response.status,
-                        response: responseData,
-                        executionTime
-                    });
-                } catch (error: any) {
-                    addLog(`❌ External API call failed: ${error.message}`);
-                    setTestResult({
-                        success: false,
-                        error: error.message
-                    });
-                }
-            } else {
-                // Mock API test (existing behavior)
-                addLog(`Request: ${requestData.method || 'GET'} ${requestData.path || '/'}`);
-
-                const outgoingEdge = edges.find(e => e.source === requestNode.id);
-                if (!outgoingEdge) {
-                    addLog('❌ No Response node connected');
-                    setTestResult({ success: false, error: 'No Response node connected' });
-                    setTesting(false);
-                    return;
-                }
-
-                const responseNode = nodes.find(n => n.id === outgoingEdge.target);
-                if (!responseNode || responseNode.type !== 'response') {
-                    addLog('❌ Connected node is not a Response node');
-                    setTestResult({ success: false, error: 'Connected node is not a Response node' });
-                    setTesting(false);
-                    return;
-                }
-
-                const responseData = responseNode.data as any;
-                addLog(`Executing response node: ${responseData.label || 'Response'}`);
-                addLog(`Response: ${responseData.statusCode || 200}`);
-
-                let responseBody = {};
-                try {
-                    if (responseData.bodyTemplate) {
-                        responseBody = JSON.parse(responseData.bodyTemplate);
-                    }
-                } catch (e) {
-                    addLog('⚠️ Invalid JSON in response body template');
-                }
-
-                setTestResult({
-                    success: true,
-                    statusCode: responseData.statusCode || 200,
-                    response: responseBody,
-                    executionTime: 0
-                });
-
-                addLog('✅ Workflow execution completed');
-            }
-        } catch (error: any) {
-            addLog(`❌ Execution error: ${error.message}`);
-            setTestResult({
-                success: false,
-                error: error.message
+            // Runs the same node semantics as the deployed serving engine
+            const executor = new WorkflowExecutor(nodes, edges, {
+                request: {
+                    method: requestData.method || 'GET',
+                    path: requestData.path || '/',
+                    headers: {},
+                    query: {},
+                    body,
+                },
             });
+
+            const result = await executor.execute();
+            setTestResult(result);
+            setTestLogs(result.logs || []);
+        } catch (error: any) {
+            setTestResult({ success: false, error: error.message });
         } finally {
             setTesting(false);
         }
@@ -368,8 +350,9 @@ export default function Toolbar() {
                         const workflow = JSON.parse(event.target?.result as string);
                         setNodes(workflow.nodes || []);
                         setEdges(workflow.edges || []);
+                        toast({ title: 'Workflow loaded from file' });
                     } catch (error) {
-                        alert('Failed to load workflow');
+                        toast({ title: 'Failed to load workflow', description: 'The file is not valid workflow JSON.', variant: 'destructive' });
                     }
                 };
                 reader.readAsText(file);
@@ -383,6 +366,19 @@ export default function Toolbar() {
             setNodes([]);
             setEdges([]);
         }
+    };
+
+    const handleLoadTemplate = (templateId: string) => {
+        const template = templates.find(t => t.id === templateId);
+        if (!template) return;
+        setNodes(template.nodes);
+        setEdges(template.edges);
+        setWorkflowId(null);
+        setWorkflowName(template.name);
+        setWorkflowDescription(template.description);
+        setIsDeployed(false);
+        setTemplatesDialogOpen(false);
+        toast({ title: `Template loaded: ${template.name}`, description: 'Test it, then Save and Deploy.' });
     };
 
     return (
@@ -445,6 +441,16 @@ export default function Toolbar() {
                         </Tooltip>
 
                         <div className="w-px h-6 bg-zinc-700 mx-1" />
+
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button variant="ghost" size="sm" onClick={() => setTemplatesDialogOpen(true)} className="text-zinc-300 hover:bg-zinc-800 hover:text-white">
+                                    <FileJson className="w-4 h-4 mr-2" />
+                                    Templates
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Start from a ready-made workflow</TooltipContent>
+                        </Tooltip>
 
                         <Tooltip>
                             <TooltipTrigger asChild>
@@ -708,6 +714,82 @@ export default function Toolbar() {
                                 </ScrollArea>
                             </div>
                         )}
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* Deploy Success Dialog */}
+            <Dialog open={deployDialogOpen} onOpenChange={setDeployDialogOpen}>
+                <DialogContent className="max-w-2xl border-indigo-100">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <Rocket className="w-5 h-5 text-emerald-500" />
+                            Your mock API is live
+                        </DialogTitle>
+                        <DialogDescription>
+                            The endpoint below serves your workflow. Anyone with the URL can call it.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="space-y-4">
+                        <div className="space-y-2">
+                            <Label>Endpoint URL</Label>
+                            <div className="flex gap-2">
+                                <Input readOnly value={getEndpointUrl() || ''} className="font-mono text-xs" />
+                                <Button variant="outline" size="sm" onClick={copyEndpoint}>
+                                    {copied ? <CheckCircle2 className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+                                </Button>
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label>Try it with curl</Label>
+                            <pre className="bg-zinc-950 text-zinc-100 p-3 rounded-md text-xs overflow-x-auto">
+                                {(() => {
+                                    const requestNode = nodes.find(n => n.type === 'request');
+                                    const method = ((requestNode?.data as any)?.method || 'GET').toUpperCase();
+                                    const url = getEndpointUrl() || '';
+                                    return method === 'GET' || method === 'DELETE'
+                                        ? `curl -X ${method} "${url}"`
+                                        : `curl -X ${method} "${url}" \\\n  -H "Content-Type: application/json" \\\n  -d '${testRequest.replace(/\n\s*/g, ' ')}'`;
+                                })()}
+                            </pre>
+                        </div>
+
+                        <Button onClick={handleTryIt} disabled={tryingIt} className="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700">
+                            {tryingIt ? 'Calling endpoint...' : 'Try it now'}
+                        </Button>
+
+                        {tryItResult && (
+                            <pre className="bg-indigo-50 p-3 rounded-md text-xs overflow-auto max-h-[200px] whitespace-pre-wrap">
+                                {tryItResult}
+                            </pre>
+                        )}
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* Templates Dialog */}
+            <Dialog open={templatesDialogOpen} onOpenChange={setTemplatesDialogOpen}>
+                <DialogContent className="max-w-2xl border-indigo-100">
+                    <DialogHeader>
+                        <DialogTitle>Start from a template</DialogTitle>
+                        <DialogDescription>
+                            Ready-made workflows — load one, Test it, then Save and Deploy.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {templates.map((template) => (
+                            <button
+                                key={template.id}
+                                onClick={() => handleLoadTemplate(template.id)}
+                                className="text-left p-4 rounded-xl border border-indigo-100 hover:border-indigo-300 hover:bg-indigo-50/50 transition-all"
+                            >
+                                <div className="font-semibold text-sm mb-1">{template.name}</div>
+                                <div className="text-xs text-muted-foreground leading-relaxed">{template.description}</div>
+                            </button>
+                        ))}
                     </div>
                 </DialogContent>
             </Dialog>

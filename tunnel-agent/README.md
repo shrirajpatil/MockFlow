@@ -4,6 +4,12 @@ Expose your local MockFlow instance to the internet using ngrok.
 
 ## Quick Start
 
+ngrok requires a free account token before it will open any tunnel — get one first:
+
+1. Sign up (free): https://dashboard.ngrok.com/signup
+2. Copy your token: https://dashboard.ngrok.com/get-started/your-authtoken
+3. `cp .env.example .env` and paste your token into `NGROK_AUTH_TOKEN`
+
 ```bash
 # Install dependencies (first time only)
 npm install
@@ -12,7 +18,7 @@ npm install
 npm start
 ```
 
-You'll get a public URL like `https://abc123.ngrok.io` that forwards to your local MockFlow on port 3000.
+You'll get a public URL like `https://abc123.ngrok-free.app` that forwards to your local MockFlow on port 3000.
 
 ## Commands
 
@@ -32,7 +38,7 @@ npm run status -- --qr
 Create a `.env` file (copy from `.env.example`):
 
 ```env
-# Optional: ngrok auth token for stable URLs
+# Required: ngrok auth token — see Quick Start above
 NGROK_AUTH_TOKEN=your_token_here
 
 # Port to tunnel (default: 3000)

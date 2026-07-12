@@ -18,9 +18,6 @@ interface ProxyRequest {
         password?: string;
     };
     timeout?: number;
-    tunnelConfig?: {
-        ngrokToken?: string;
-    };
 }
 
 /**
@@ -74,6 +71,30 @@ function isLocalURL(url: string): boolean {
         return urlObj.hostname === 'localhost' ||
             urlObj.hostname === '127.0.0.1' ||
             urlObj.hostname.endsWith('.local');
+    } catch {
+        return false;
+    }
+}
+
+/**
+ * SSRF guard: reject URLs whose hostname is a literal private/reserved IP.
+ * (Hostname-based check; a DNS-resolution check is a future hardening step.)
+ */
+function isPrivateAddress(url: string): boolean {
+    try {
+        const { hostname } = new URL(url);
+        if (!/^\d{1,3}(\.\d{1,3}){3}$/.test(hostname)) return false;
+
+        const octets = hostname.split('.').map(Number);
+        const [a, b] = octets as [number, number, number, number];
+        return (
+            a === 10 ||
+            a === 127 ||
+            (a === 172 && b >= 16 && b <= 31) ||
+            (a === 192 && b === 168) ||
+            (a === 169 && b === 254) ||
+            a === 0
+        );
     } catch {
         return false;
     }
@@ -205,23 +226,19 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
             }
         }
 
-        // 3. Resolve Local URL / Tunnel
-        if (isLocalURL(config.url)) {
-            if (!config.tunnelConfig?.ngrokToken) {
-                return {
-                    statusCode: 400,
-                    headers: {
-                        ...corsHeaders,
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        error: 'Local API tunnel not configured',
-                        message: 'To test local APIs, please configure your ngrok token in the Tunnel settings (top-right toolbar)',
-                        details: 'Click the Tunnel button → Enter your ngrok auth token → Save',
-                    }),
-                };
-            }
-            console.log('Tunnel token provided, would create tunnel here');
+        // 3. Local and private URLs cannot be reached from deployed infrastructure
+        if (isLocalURL(config.url) || isPrivateAddress(config.url)) {
+            return {
+                statusCode: 400,
+                headers: {
+                    ...corsHeaders,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    error: 'Cannot reach local/private addresses',
+                    message: 'This proxy runs in the cloud and cannot reach your machine. To test a local API, expose it with the tunnel-agent CLI (npm start in tunnel-agent/) and use the public ngrok URL in your Request node.',
+                }),
+            };
         }
 
         // 4. Build axios config & Execute

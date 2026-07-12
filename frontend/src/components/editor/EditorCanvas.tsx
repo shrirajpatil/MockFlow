@@ -19,6 +19,8 @@ import StateNode from '../nodes/StateNode';
 import ConditionalNode from '../nodes/ConditionalNode';
 import 'reactflow/dist/style.css';
 import useStore from '@/store/useStore';
+import { templates } from '@/lib/templates';
+import { MousePointerClick, Sparkles } from 'lucide-react';
 
 const nodeTypes = {
     request: RequestNode,
@@ -161,6 +163,41 @@ const EditorCanvasContent = () => {
                     maskColor="rgba(0,0,0,0.7)"
                 />
             </ReactFlow>
+            {nodes.length === 0 && <EmptyCanvasHint />}
+        </div>
+    );
+};
+
+/** Shown only on a blank canvas — points new users at the two ways to start. */
+const EmptyCanvasHint = () => {
+    const { setNodes, setEdges } = useStore();
+
+    const loadStarterTemplate = () => {
+        const starter = templates.find((t) => t.id === 'users-list') ?? templates[0];
+        if (starter) {
+            setNodes(starter.nodes);
+            setEdges(starter.edges);
+        }
+    };
+
+    return (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="pointer-events-auto text-center max-w-sm px-6 py-8 rounded-2xl bg-zinc-900/70 border border-white/10 backdrop-blur-sm">
+                <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 flex items-center justify-center">
+                    <MousePointerClick className="w-6 h-6 text-indigo-300" />
+                </div>
+                <h3 className="text-white font-semibold text-sm mb-1.5">Your canvas is empty</h3>
+                <p className="text-zinc-400 text-xs leading-relaxed mb-4">
+                    Drag a node from the sidebar to start building, or load a working example.
+                </p>
+                <button
+                    onClick={loadStarterTemplate}
+                    className="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 rounded-lg px-3.5 py-2 transition-colors"
+                >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    Load an example workflow
+                </button>
+            </div>
         </div>
     );
 };

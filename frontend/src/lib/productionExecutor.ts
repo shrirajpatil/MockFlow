@@ -1,6 +1,7 @@
 import { Node, Edge } from 'reactflow';
 import type { NodeData } from '@/types/nodes';
 import { smartHTTPRequest, HTTPRequestConfig, HTTPResponse } from './httpClient';
+import { evaluateCondition } from './safeEval';
 
 export interface ExecutionContext {
     request: {
@@ -255,11 +256,23 @@ export class ProductionWorkflowExecutor {
             const value = this.context.state[key];
             this.context.variables[key] = value;
         } else if (operation === 'set') {
-            this.log(`State SET: ${key} = ${data.value}`);
-            this.context.state[key] = data.value;
+            // Value supports {{path}} templating so state can capture request data
+            const value = this.renderTemplateValue(String(data.value ?? ''));
+            this.log(`State SET: ${key}`);
+            this.context.state[key] = value;
         }
 
         return {};
+    }
+
+    /** Replace {{path}} in a string; a template that is exactly one placeholder keeps the value's type. */
+    private renderTemplateValue(template: string): any {
+        const exact = /^\{\{(\w+(?:\.\w+)*)\}\}$/.exec(template.trim());
+        if (exact) return this.getValueFromPath(exact[1]);
+        return template.replace(/\{\{(\w+(?:\.\w+)*)\}\}/g, (_m, path: string) => {
+            const value = this.getValueFromPath(path);
+            return typeof value === 'string' ? value : JSON.stringify(value ?? null);
+        });
     }
 
     private async executeConditionalNode(node: Node): Promise<Partial<ExecutionResult>> {
@@ -268,23 +281,12 @@ export class ProductionWorkflowExecutor {
 
         this.log(`Evaluating condition: ${condition}`);
 
-        // Simple condition evaluation
-        let result = false;
-        try {
-            // Create a safe evaluation context
-            const evalContext = {
-                request: this.context.request,
-                state: this.context.state,
-                variables: this.context.variables,
-                response: this.context.lastResponse?.body,
-            };
-
-            // Very basic evaluation - in production use a proper expression parser
-            result = eval(`with(evalContext) { ${condition} }`);
-        } catch (e: any) {
-            this.log(`Condition evaluation error: ${e.message}`);
-            result = false;
-        }
+        const result = evaluateCondition(condition, {
+            request: this.context.request,
+            state: this.context.state,
+            variables: this.context.variables,
+            response: this.context.lastResponse?.body,
+        });
 
         this.log(`Condition result: ${result}`);
 
@@ -347,6 +349,4 @@ export class ProductionWorkflowExecutor {
     }
 }
 
-// Export both executors
-export { WorkflowExecutor } from './executor';
-export { ProductionWorkflowExecutor as RealAPIExecutor };
+export { ProductionWorkflowExecutor as WorkflowExecutor };

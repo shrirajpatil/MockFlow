@@ -4,6 +4,7 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import qrcode from 'qrcode-terminal';
 import TunnelManager from './tunnel-manager.js';
+import { startControlServer } from './control-server.js';
 
 const program = new Command();
 const manager = new TunnelManager();
@@ -19,6 +20,8 @@ program
     .description('Start the ngrok tunnel')
     .option('-q, --qr', 'Display QR code for mobile access')
     .action(async (options) => {
+        const controlServer = startControlServer(manager);
+
         try {
             const url = await manager.start();
 
@@ -31,7 +34,15 @@ program
             await manager.keepAlive();
         } catch (error) {
             console.error(chalk.red('Failed to start tunnel:'), error.message);
-            process.exit(1);
+            console.log(chalk.yellow('\n💡 The control server is still running — open MockFlow\'s'));
+            console.log(chalk.yellow('   "Local APIs" panel to paste your ngrok token, then restart this command.\n'));
+            console.log(chalk.gray('Press Ctrl+C to exit.\n'));
+
+            // Keep the process (and control server) alive so the user can configure
+            // the token from the browser without re-running the CLI from scratch.
+            await new Promise(() => {
+                process.on('SIGINT', () => { controlServer.close(); process.exit(0); });
+            });
         }
     });
 
@@ -118,6 +129,18 @@ program
             console.error(chalk.red('Failed to restart tunnel:'), error.message);
             process.exit(1);
         }
+    });
+
+// Configure command — runs just the local control server so the MockFlow
+// web UI can save an ngrok token without starting a tunnel yet.
+program
+    .command('configure')
+    .description('Run only the local control server, so you can paste your ngrok token from the MockFlow web UI')
+    .action(() => {
+        const controlServer = startControlServer(manager);
+        console.log(chalk.gray('Open MockFlow → toolbar → "Local APIs" and paste your ngrok token.'));
+        console.log(chalk.gray('Press Ctrl+C to exit once configured, then run "npm start".\n'));
+        process.on('SIGINT', () => { controlServer.close(); process.exit(0); });
     });
 
 // Parse command line arguments

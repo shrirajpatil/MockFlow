@@ -171,7 +171,8 @@ export default function LandingPage() {
             </Link>
             <div className="hidden md:flex items-center gap-6 text-sm text-indigo-300/60">
               <Link href="/editor" className="hover:text-white transition-colors">Editor</Link>
-              <Link href="https://github.com" target="_blank" className="hover:text-white transition-colors">Docs</Link>
+              <Link href="/workflows" className="hover:text-white transition-colors">Workflows</Link>
+              <Link href="https://github.com/shrirajpatil/MockFlow#readme" target="_blank" className="hover:text-white transition-colors">Docs</Link>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -201,7 +202,7 @@ export default function LandingPage() {
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-sm text-indigo-300 hover:border-indigo-500/40 transition-all mb-10 group"
           >
             <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-            Now in public beta
+            Free and open source
             <ChevronRight className="w-4 h-4 text-indigo-400 group-hover:translate-x-0.5 transition-transform" />
           </Link>
 
@@ -243,7 +244,7 @@ export default function LandingPage() {
               </Button>
             </Link>
             <Link
-              href="https://github.com"
+              href="https://github.com/shrirajpatil/MockFlow"
               target="_blank"
               className="flex items-center gap-2 px-6 py-3 text-sm text-indigo-200/60 hover:text-white border border-indigo-500/20 rounded-xl hover:border-indigo-500/40 hover:bg-indigo-500/10 transition-all"
             >
@@ -361,16 +362,17 @@ export default function LandingPage() {
 
           <div className="grid md:grid-cols-3 gap-6">
             {[
-              { icon: Workflow, title: 'Visual Workflow', desc: 'Build complex API logic with an intuitive drag-and-drop interface.', color: 'violet' },
-              { icon: Shield, title: 'Built-in Validation', desc: 'Add request validation, authentication, and error handling nodes.', color: 'blue' },
-              { icon: Rocket, title: 'One-Click Deploy', desc: 'Deploy your mock API instantly with a unique endpoint URL.', color: 'emerald' },
+              // Tailwind can't generate interpolated class names, so each card carries full class strings
+              { icon: Workflow, title: 'Visual Workflow', desc: 'Build complex API logic with an intuitive drag-and-drop interface.', box: 'from-violet-500/20 to-violet-600/10 border-violet-500/30', text: 'text-violet-400' },
+              { icon: Shield, title: 'Built-in Validation', desc: 'Add request validation, authentication, and error handling nodes.', box: 'from-blue-500/20 to-blue-600/10 border-blue-500/30', text: 'text-blue-400' },
+              { icon: Rocket, title: 'One-Click Deploy', desc: 'Deploy your mock API instantly with a unique endpoint URL.', box: 'from-emerald-500/20 to-emerald-600/10 border-emerald-500/30', text: 'text-emerald-400' },
             ].map((f, i) => (
               <div
                 key={i}
                 className="group p-6 rounded-2xl bg-[#0d1024]/50 border border-indigo-500/10 hover:border-indigo-500/30 transition-all hover:shadow-xl hover:shadow-indigo-500/5 backdrop-blur-sm"
               >
-                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br from-${f.color}-500/20 to-${f.color}-600/10 border border-${f.color}-500/30 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform`}>
-                  <f.icon className={`w-6 h-6 text-${f.color}-400`} />
+                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br border ${f.box} flex items-center justify-center mb-5 group-hover:scale-110 transition-transform`}>
+                  <f.icon className={`w-6 h-6 ${f.text}`} />
                 </div>
                 <h3 className="text-lg font-semibold text-white mb-2">{f.title}</h3>
                 <p className="text-sm text-indigo-200/50 leading-relaxed">{f.desc}</p>

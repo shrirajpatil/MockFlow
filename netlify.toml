@@ -3,6 +3,13 @@
   publish = "frontend/.next"
   functions = "backend/netlify/functions"
 
+[dev]
+  command = "cd frontend && npm run dev"
+  targetPort = 3000
+  framework = "next"
+  publish = "frontend/.next"
+  functions = "backend/netlify/functions"
+
 # The Backend API - Redirects /api to our Execute function
 [[redirects]]
   from = "/api/*"

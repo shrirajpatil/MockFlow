@@ -10,7 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Trash2, Settings2, Sparkles } from 'lucide-react';
+import { Plus, Trash2, Settings2, Sparkles, Terminal, Copy, Check } from 'lucide-react';
 import type { NodeData } from '@/types/nodes';
 
 const NodeConfigPanel = () => {
@@ -99,6 +99,7 @@ const labelStyles = "text-xs text-zinc-400 font-medium";
 const RequestConfig = ({ data, updateData }: any) => {
     const method = data.method || 'GET';
     const noBody = method === 'GET' || method === 'DELETE';
+    const isLocalhost = /^(https?:\/\/)?(localhost|127\.0\.0\.1)/i.test(data.path || '');
     return (
         <div className="space-y-4">
             <div className="space-y-2">
@@ -124,11 +125,15 @@ const RequestConfig = ({ data, updateData }: any) => {
                     placeholder="https://api.example.com/users or /api/users"
                     className={`${inputStyles} font-mono`}
                 />
-                <div className="bg-indigo-500/20 border border-indigo-400/30 rounded-lg p-3">
-                    <p className="text-xs text-indigo-200">
-                        <span className="font-bold text-indigo-300">TIP:</span> Enter full URL like <code className="bg-indigo-500/30 px-1 rounded">https://api.example.com/users</code> to call real APIs
-                    </p>
-                </div>
+                {isLocalhost ? (
+                    <LocalhostHint />
+                ) : (
+                    <div className="bg-indigo-500/20 border border-indigo-400/30 rounded-lg p-3">
+                        <p className="text-xs text-indigo-200">
+                            <span className="font-bold text-indigo-300">TIP:</span> Enter full URL like <code className="bg-indigo-500/30 px-1 rounded">https://api.example.com/users</code> to call real APIs
+                        </p>
+                    </div>
+                )}
             </div>
             {!noBody && (
                 <div className="space-y-2">
@@ -149,11 +154,53 @@ const RequestConfig = ({ data, updateData }: any) => {
     );
 };
 
+/**
+ * Shown when a Request node's URL points at localhost/127.0.0.1 — the cloud
+ * proxy can't reach it, so this walks the user through exposing it via the
+ * bundled tunnel-agent (see WorkspaceTunnelSettings for the full dialog).
+ */
+const LocalhostHint = () => {
+    const [copied, setCopied] = useState(false);
+    const command = 'cd tunnel-agent && npm install && npm start';
+
+    const copy = () => {
+        navigator.clipboard.writeText(command);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
+
+    return (
+        <div className="bg-amber-500/10 border border-amber-400/30 rounded-lg p-3 space-y-2">
+            <p className="text-xs text-amber-200">
+                <span className="font-bold text-amber-300">Heads up:</span> localhost isn&apos;t reachable from the cloud.
+                Needs a free ngrok token first — see the <span className="font-medium">Local APIs</span> button in the
+                toolbar for setup, then run:
+            </p>
+            <div className="flex items-center gap-2 bg-black/30 rounded-md px-2 py-1.5">
+                <Terminal className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                <code className="text-[11px] text-amber-100 flex-1 truncate">{command}</code>
+                <button onClick={copy} className="shrink-0 text-amber-300 hover:text-amber-100" title="Copy command">
+                    {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                </button>
+            </div>
+        </div>
+    );
+};
+
+const CONDITION_HELP: Record<string, string> = {
+    required: 'Fails if the field is missing, null, or empty',
+    type: 'Fails unless typeof field matches Value exactly (e.g. "string", "number", "boolean")',
+    regex: 'Fails unless the field matches the pattern in Value (e.g. ^[^@]+@[^@]+$)',
+    min: 'Fails if the field is a number less than Value',
+    max: 'Fails if the field is a number greater than Value',
+};
+
 const ValidationConfig = ({ data, updateData }: any) => {
     const rules = data.rules || [];
     const addRule = () => updateData({ rules: [...rules, { field: '', condition: 'required', value: '', errorMessage: '' }] });
     const removeRule = (idx: number) => updateData({ rules: rules.filter((_: any, i: number) => i !== idx) });
     const updateRule = (idx: number, upd: any) => updateData({ rules: rules.map((r: any, i: number) => i === idx ? { ...r, ...upd } : r) });
+    const needsValue = (condition: string) => ['type', 'regex', 'min', 'max'].includes(condition);
 
     return (
         <div className="space-y-4">
@@ -163,6 +210,9 @@ const ValidationConfig = ({ data, updateData }: any) => {
                     <Plus className="w-3 h-3 mr-1" /> Add
                 </Button>
             </div>
+            <p className="text-xs text-zinc-500">
+                Checked in order against the request body. The first failing rule returns a 400 with its error message.
+            </p>
             {rules.length === 0 && (
                 <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-4 text-center">
                     <p className="text-xs text-zinc-500">No rules yet. Add one to validate data.</p>
@@ -176,13 +226,40 @@ const ValidationConfig = ({ data, updateData }: any) => {
                             <Trash2 className="w-3 h-3" />
                         </Button>
                     </div>
-                    <Input value={rule.field} onChange={(e) => updateRule(idx, { field: e.target.value })} placeholder="Field name" className={inputStyles} />
-                    <Select value={rule.condition} onValueChange={(v) => updateRule(idx, { condition: v })}>
-                        <SelectTrigger className={inputStyles}><SelectValue /></SelectTrigger>
-                        <SelectContent className="bg-zinc-800 border-zinc-700">
-                            {['required', 'minLength', 'maxLength', 'pattern', 'email', 'custom'].map(c => <SelectItem key={c} value={c} className="text-white hover:bg-zinc-700">{c}</SelectItem>)}
-                        </SelectContent>
-                    </Select>
+                    <div className="space-y-1">
+                        <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Field name in request body</span>
+                        <Input value={rule.field} onChange={(e) => updateRule(idx, { field: e.target.value })} placeholder="e.g. email" className={inputStyles} />
+                    </div>
+                    <div className="space-y-1">
+                        <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Condition</span>
+                        <Select value={rule.condition} onValueChange={(v) => updateRule(idx, { condition: v })}>
+                            <SelectTrigger className={inputStyles}><SelectValue /></SelectTrigger>
+                            <SelectContent className="bg-zinc-800 border-zinc-700">
+                                {['required', 'type', 'regex', 'min', 'max'].map(c => <SelectItem key={c} value={c} className="text-white hover:bg-zinc-700">{c}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
+                        <p className="text-[11px] text-zinc-500">{CONDITION_HELP[rule.condition] || ''}</p>
+                    </div>
+                    {needsValue(rule.condition) && (
+                        <div className="space-y-1">
+                            <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Value</span>
+                            <Input
+                                value={rule.value || ''}
+                                onChange={(e) => updateRule(idx, { value: e.target.value })}
+                                placeholder={rule.condition === 'regex' ? '^[^@]+@[^@]+\\.[^@]+$' : rule.condition === 'type' ? 'string' : '0'}
+                                className={`${inputStyles} font-mono`}
+                            />
+                        </div>
+                    )}
+                    <div className="space-y-1">
+                        <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Error message (optional)</span>
+                        <Input
+                            value={rule.errorMessage || ''}
+                            onChange={(e) => updateRule(idx, { errorMessage: e.target.value })}
+                            placeholder="Shown in the 400 response if this rule fails"
+                            className={inputStyles}
+                        />
+                    </div>
                 </div>
             ))}
         </div>
@@ -203,6 +280,12 @@ const TransformationConfig = ({ data, updateData }: any) => {
                     <Plus className="w-3 h-3 mr-1" /> Add
                 </Button>
             </div>
+            <div className="bg-orange-500/10 border border-orange-500/20 rounded-lg p-2.5">
+                <p className="text-[11px] text-orange-300">
+                    Copies a value from <strong>Source</strong> into <strong>Target</strong>, so later nodes
+                    (like Response) can read it as <code className="bg-black/20 px-1 rounded">{'{{'}variables.target{'}}'}</code>.
+                </p>
+            </div>
             {transformations.length === 0 && (
                 <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-4 text-center">
                     <p className="text-xs text-zinc-500">No transformations. Add one to modify data.</p>
@@ -216,8 +299,14 @@ const TransformationConfig = ({ data, updateData }: any) => {
                             <Trash2 className="w-3 h-3" />
                         </Button>
                     </div>
-                    <Input value={t.target} onChange={(e) => updateTransform(idx, { target: e.target.value })} placeholder="Target field" className={inputStyles} />
-                    <Input value={t.source} onChange={(e) => updateTransform(idx, { source: e.target.value })} placeholder="Source field" className={inputStyles} />
+                    <div className="space-y-1">
+                        <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Source — where the value comes from</span>
+                        <Input value={t.source} onChange={(e) => updateTransform(idx, { source: e.target.value })} placeholder="request.body.name" className={`${inputStyles} font-mono`} />
+                    </div>
+                    <div className="space-y-1">
+                        <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Target — the name to store it under</span>
+                        <Input value={t.target} onChange={(e) => updateTransform(idx, { target: e.target.value })} placeholder="user.name" className={`${inputStyles} font-mono`} />
+                    </div>
                 </div>
             ))}
         </div>
@@ -233,40 +322,80 @@ const ResponseConfig = ({ data, updateData }: any) => (
         <div className="space-y-2">
             <Label className={labelStyles}>Body Template</Label>
             <Textarea value={data.bodyTemplate || ''} onChange={(e) => updateData({ bodyTemplate: e.target.value })} className={textareaStyles} rows={6} placeholder='{"status": "success", "data": {...}}' />
+            <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-2.5 space-y-1">
+                <p className="text-[11px] text-emerald-300">
+                    Must be valid JSON. Insert dynamic values with <code className="bg-black/20 px-1 rounded">{'{{'}path{'}}'}</code>:
+                </p>
+                <ul className="text-[11px] text-emerald-300/80 space-y-0.5 pl-3 list-disc">
+                    <li><code className="bg-black/20 px-1 rounded">{'{{'}request.body.name{'}}'}</code> — data from the incoming request</li>
+                    <li><code className="bg-black/20 px-1 rounded">{'{{'}variables.user{'}}'}</code> — a value set by a Transformation node</li>
+                    <li><code className="bg-black/20 px-1 rounded">{'{{'}state.count{'}}'}</code> — a value set by a State node</li>
+                </ul>
+            </div>
         </div>
     </div>
 );
 
-const StateConfig = ({ data, updateData }: any) => (
-    <div className="space-y-4">
-        <div className="space-y-2">
-            <Label className={labelStyles}>Operation</Label>
-            <Select value={data.operation || 'set'} onValueChange={(v) => updateData({ operation: v })}>
-                <SelectTrigger className={inputStyles}><SelectValue /></SelectTrigger>
-                <SelectContent className="bg-zinc-800 border-zinc-700">
-                    {['set', 'get', 'delete', 'increment'].map(o => <SelectItem key={o} value={o} className="text-white hover:bg-zinc-700">{o}</SelectItem>)}
-                </SelectContent>
-            </Select>
+const StateConfig = ({ data, updateData }: any) => {
+    const operation = data.operation || 'set';
+    return (
+        <div className="space-y-4">
+            <div className="bg-cyan-500/10 border border-cyan-500/20 rounded-lg p-2.5">
+                <p className="text-[11px] text-cyan-300">
+                    State persists <strong>across separate requests</strong> to this workflow (e.g. a POST that saves
+                    data, and a later GET that reads it back) — unlike Transformation, which only lasts one request.
+                </p>
+            </div>
+            <div className="space-y-2">
+                <Label className={labelStyles}>Operation</Label>
+                <Select value={operation} onValueChange={(v) => updateData({ operation: v })}>
+                    <SelectTrigger className={inputStyles}><SelectValue /></SelectTrigger>
+                    <SelectContent className="bg-zinc-800 border-zinc-700">
+                        {['get', 'set'].map(o => <SelectItem key={o} value={o} className="text-white hover:bg-zinc-700">{o}</SelectItem>)}
+                    </SelectContent>
+                </Select>
+                <p className="text-[11px] text-zinc-500">
+                    {operation === 'get'
+                        ? 'Loads the value under Key into variables.<key> for later nodes to use'
+                        : 'Saves Value under Key, replacing whatever was there before'}
+                </p>
+            </div>
+            <div className="space-y-2">
+                <Label className={labelStyles}>Key</Label>
+                <Input value={data.key || ''} onChange={(e) => updateData({ key: e.target.value })} placeholder="profile" className={`${inputStyles} font-mono`} />
+                <p className="text-[11px] text-zinc-500">A short name for this piece of data, e.g. &quot;profile&quot; or &quot;counter&quot;.</p>
+            </div>
+            {operation === 'set' && (
+                <div className="space-y-2">
+                    <Label className={labelStyles}>Value</Label>
+                    <Input value={data.value || ''} onChange={(e) => updateData({ value: e.target.value })} placeholder="{{request.body}}" className={`${inputStyles} font-mono`} />
+                    <p className="text-[11px] text-zinc-500">
+                        Supports <code className="bg-black/20 px-1 rounded">{'{{'}path{'}}'}</code> templating, e.g.{' '}
+                        <code className="bg-black/20 px-1 rounded">{'{{'}request.body{'}}'}</code> to store the whole request body.
+                    </p>
+                </div>
+            )}
         </div>
-        <div className="space-y-2">
-            <Label className={labelStyles}>Key</Label>
-            <Input value={data.key || ''} onChange={(e) => updateData({ key: e.target.value })} placeholder="state.key" className={`${inputStyles} font-mono`} />
-        </div>
-        <div className="space-y-2">
-            <Label className={labelStyles}>Value</Label>
-            <Input value={data.value || ''} onChange={(e) => updateData({ value: e.target.value })} placeholder="value" className={inputStyles} />
-        </div>
-    </div>
-);
+    );
+};
 
 const ConditionalConfig = ({ data, updateData }: any) => (
     <div className="space-y-4">
         <div className="space-y-2">
             <Label className={labelStyles}>Condition</Label>
-            <Textarea value={data.condition || ''} onChange={(e) => updateData({ condition: e.target.value })} className={textareaStyles} rows={3} placeholder="request.body.amount > 100" />
-            <div className="bg-fuchsia-500/10 border border-fuchsia-500/20 rounded-lg p-2.5">
+            <Textarea value={data.condition || ''} onChange={(e) => updateData({ condition: e.target.value })} className={textareaStyles} rows={3} placeholder="request.body.age >= 18" />
+            <div className="bg-fuchsia-500/10 border border-fuchsia-500/20 rounded-lg p-2.5 space-y-1.5">
                 <p className="text-[11px] text-fuchsia-300">
-                    💡 Use JavaScript expressions like: request.body.age {'>='} 18
+                    A simple expression, evaluated safely (not full JavaScript — no function calls like{' '}
+                    <code className="bg-black/20 px-1 rounded">.includes()</code>).
+                </p>
+                <p className="text-[11px] text-fuchsia-300/80">
+                    Supports: <code className="bg-black/20 px-1 rounded">== != &gt; &lt; &gt;= &lt;= && || !</code> and{' '}
+                    <code className="bg-black/20 px-1 rounded">request.</code>, <code className="bg-black/20 px-1 rounded">state.</code>,{' '}
+                    <code className="bg-black/20 px-1 rounded">variables.</code> paths.
+                </p>
+                <p className="text-[11px] text-fuchsia-300/80">
+                    e.g. <code className="bg-black/20 px-1 rounded">request.body.age {'>='} 18 && state.approved == true</code>
                 </p>
             </div>
         </div>
@@ -279,6 +408,12 @@ const ConditionalConfig = ({ data, updateData }: any) => (
                 <Label className={labelStyles}>False Label</Label>
                 <Input value={data.falseLabel || 'No'} onChange={(e) => updateData({ falseLabel: e.target.value })} className={inputStyles} />
             </div>
+        </div>
+        <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-2.5">
+            <p className="text-[11px] text-zinc-400">
+                Connect this node&apos;s two outgoing handles to different next steps — the bottom-left handle fires on{' '}
+                <span className="text-emerald-400">true</span>, bottom-right on <span className="text-red-400">false</span>.
+            </p>
         </div>
     </div>
 );

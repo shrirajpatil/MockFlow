@@ -32,21 +32,14 @@ export async function saveWorkflow(params: SaveWorkflowParams): Promise<Workflow
             .single();
 
         if (error) {
-            console.error('Error saving workflow:', {
-                message: error.message,
-                details: error.details,
-                hint: error.hint,
-                code: error.code,
-                fullError: error
-            });
-            alert(`Failed to save workflow: ${error.message || 'Unknown error'}\n\nHint: ${error.hint || 'Check console for details'}`);
-            return null;
+            console.error('Error saving workflow:', error.message);
+            throw new Error(error.message || 'Failed to save workflow');
         }
 
         return data;
     } catch (error) {
         console.error('Error saving workflow:', error);
-        return null;
+        throw error;
     }
 }
 
@@ -69,21 +62,14 @@ export async function updateWorkflow(params: UpdateWorkflowParams): Promise<Work
             .single();
 
         if (error) {
-            console.error('Error updating workflow:', {
-                message: error.message,
-                details: error.details,
-                hint: error.hint,
-                code: error.code,
-                fullError: error
-            });
-            alert(`Failed to update workflow: ${error.message || 'Unknown error'}`);
-            return null;
+            console.error('Error updating workflow:', error.message);
+            throw new Error(error.message || 'Failed to update workflow');
         }
 
         return data;
     } catch (error) {
         console.error('Error updating workflow:', error);
-        return null;
+        throw error;
     }
 }
 
@@ -111,13 +97,15 @@ export async function loadWorkflow(id: string): Promise<Workflow | null> {
 }
 
 /**
- * List all workflows
+ * List workflows in a workspace. Workspaces are unauthenticated namespaces,
+ * so every query must be scoped — never list across workspaces.
  */
-export async function listWorkflows(): Promise<Workflow[]> {
+export async function listWorkflows(workspace: string): Promise<Workflow[]> {
     try {
         const { data, error } = await supabase
             .from('workflows')
             .select('*')
+            .eq('workspace', workspace)
             .order('updated_at', { ascending: false });
 
         if (error) {
@@ -234,58 +222,4 @@ export async function undeployWorkflow(id: string): Promise<boolean> {
     }
 }
 
-/**
- * Find a deployed workflow by workspace, path and method
- */
-export async function getWorkflowByPath(workspace: string, path: string, method: string): Promise<Workflow | null> {
-    try {
-        const { data, error } = await supabase
-            .from('workflows')
-            .select('*')
-            .eq('deployed', true)
-            .eq('workspace', workspace)
-            .order('updated_at', { ascending: false });
-
-        if (error) {
-            console.error('Error fetching workflows:', error);
-            return null;
-        }
-
-        if (!data || data.length === 0) {
-            console.log(`[MockFlow] No deployed workflows found for workspace: ${workspace}`);
-            return null;
-        }
-
-        // Find workflow with matching Request node
-        for (const workflow of data) {
-            const requestNode = workflow.nodes.find((node: any) => {
-                console.log('[MockFlow] Checking node:', {
-                    type: node.type,
-                    path: node.data?.path,
-                    method: node.data?.method,
-                    lookingFor: { workspace, path, method }
-                });
-
-                return node.type === 'request' &&
-                    node.data.path === path &&
-                    (node.data.method === method || node.data.method === 'ANY');
-            });
-
-            if (requestNode) {
-                console.log('[MockFlow] ✅ Found matching workflow:', {
-                    workflowName: workflow.name,
-                    workspace: workflow.workspace,
-                    requestMethod: requestNode.data.method,
-                    requestPath: requestNode.data.path
-                });
-                return workflow;
-            }
-        }
-
-        return null;
-    } catch (error) {
-        console.error('Error finding workflow by path:', error);
-        return null;
-    }
-}
 

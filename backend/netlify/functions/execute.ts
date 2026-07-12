@@ -1,36 +1,69 @@
 import type { Handler } from '@netlify/functions';
 import { executeMock } from '../../src/mockEngine.js';
 
-export const handler: Handler = async (event, context) => {
-    const path = event.path.replace('/.netlify/functions/execute', '').replace('/api/execute', '');
-    // Expected path format: /:mockId/:path*
+const CORS_HEADERS = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+};
+
+/**
+ * Serves deployed mock APIs.
+ * URL shape: /api/{workspace}/{...path} (see netlify.toml redirect)
+ */
+export const handler: Handler = async (event) => {
+    if (event.httpMethod === 'OPTIONS') {
+        return { statusCode: 204, headers: CORS_HEADERS, body: '' };
+    }
+
+    const path = event.path
+        .replace('/.netlify/functions/execute', '')
+        .replace(/^\/api/, '');
 
     const parts = path.split('/').filter(Boolean);
     if (parts.length < 1) {
         return {
             statusCode: 400,
-            body: JSON.stringify({ error: 'Missing mockId' }),
+            headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                error: 'Missing workspace',
+                usage: '/api/{workspace}/{endpoint-path}',
+            }),
         };
     }
 
-    const mockId = parts[0];
+    const workspace = decodeURIComponent(parts[0]!);
     const actualPath = '/' + parts.slice(1).join('/');
+
+    let body: any = null;
+    if (event.body) {
+        try {
+            body = JSON.parse(event.body);
+        } catch {
+            body = event.body; // non-JSON bodies pass through as raw text
+        }
+    }
 
     try {
         const result = await executeMock({
-            mockId,
+            workspace,
             path: actualPath,
             method: event.httpMethod || 'GET',
-            body: event.body ? JSON.parse(event.body) : {},
-            headers: event.headers,
+            body,
+            headers: (event.headers || {}) as Record<string, string>,
+            query: (event.queryStringParameters || {}) as Record<string, any>,
         });
 
-        return result;
+        return {
+            ...result,
+            headers: { ...CORS_HEADERS, ...result.headers },
+        };
     } catch (err: any) {
-        console.error(err);
+        console.error('[Execute] Unhandled error:', err);
         return {
             statusCode: 500,
-            body: JSON.stringify({ error: 'Internal Server Error', details: err.message }),
+            headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ error: 'Internal Server Error' }),
         };
     }
 };

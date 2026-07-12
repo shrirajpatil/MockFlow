@@ -117,28 +117,9 @@ export async function makeHTTPRequest(config: HTTPRequestConfig): Promise<HTTPRe
 export async function makeProxiedRequest(config: HTTPRequestConfig): Promise<HTTPResponse> {
     try {
         const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || '';
-        const proxyUrl = backendUrl ? `${backendUrl}/api/proxy` : '/.netlify/functions/proxy';
+        const proxyUrl = backendUrl ? `${backendUrl}/backend/proxy` : '/.netlify/functions/proxy';
 
-        // Get user's tunnel configuration from localStorage
-        let tunnelConfig: any = {};
-        if (typeof window !== 'undefined') {
-            const stored = localStorage.getItem('mockflow_tunnel_config');
-            if (stored) {
-                try {
-                    tunnelConfig = JSON.parse(stored);
-                } catch (e) {
-                    console.error('Failed to parse tunnel config:', e);
-                }
-            }
-        }
-
-        // Include tunnel config in the request
-        const response = await axios.post(proxyUrl, {
-            ...config,
-            tunnelConfig: tunnelConfig.enabled ? {
-                ngrokToken: tunnelConfig.ngrokToken
-            } : undefined
-        });
+        const response = await axios.post(proxyUrl, config);
         return response.data;
     } catch (error: any) {
         throw new Error(`Proxy error: ${error.message}`);

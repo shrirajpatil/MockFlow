@@ -22,6 +22,17 @@ class TunnelManager {
      * Start the ngrok tunnel
      */
     async start() {
+        if (!process.env.NGROK_AUTH_TOKEN) {
+            const message =
+                'NGROK_AUTH_TOKEN is not set. ngrok requires a free account token to open a tunnel.\n' +
+                '  1. Sign up (free): https://dashboard.ngrok.com/signup\n' +
+                '  2. Copy your token: https://dashboard.ngrok.com/get-started/your-authtoken\n' +
+                '  3. Copy tunnel-agent/.env.example to tunnel-agent/.env and paste it into NGROK_AUTH_TOKEN';
+            console.error(`❌ ${message}`);
+            this.saveStatus({ active: false, error: message });
+            throw new Error(message);
+        }
+
         try {
             console.log(`🚀 Starting tunnel to localhost:${this.port}...`);
 

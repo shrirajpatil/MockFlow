@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { Copy, ExternalLink, Wifi } from 'lucide-react';
 
+const CONTROL_SERVER_URL = 'http://127.0.0.1:4756';
+
 interface TunnelStatus {
     active: boolean;
     url?: string;
@@ -31,15 +33,16 @@ export default function TunnelStatus() {
 
     const checkStatus = async () => {
         try {
-            // Try to read tunnel status from the tunnel-agent
-            const response = await fetch('/api/tunnel-status');
+            // The tunnel agent runs a local-only control server on the user's
+            // own machine (see tunnel-agent/control-server.js) — never a MockFlow server.
+            const response = await fetch(`${CONTROL_SERVER_URL}/status`, { signal: AbortSignal.timeout(2000) });
             if (response.ok) {
                 const data = await response.json();
                 setStatus(data);
             } else {
                 setStatus({ active: false });
             }
-        } catch (error) {
+        } catch {
             // Tunnel agent not running or status not available
             setStatus({ active: false });
         }
