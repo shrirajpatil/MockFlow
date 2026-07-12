@@ -1,7 +1,11 @@
 [build]
-  command = "cd backend && npm install && cd ../frontend && npm install && npm run build"
-  publish = "frontend/.next"
-  functions = "backend/netlify/functions"
+  base = "frontend"
+  command = "cd ../backend && npm install && cd ../frontend && npm install && npm run build"
+  publish = ".next"
+  functions = "../backend/netlify/functions"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
 
 [dev]
   command = "cd frontend && npm run dev"
