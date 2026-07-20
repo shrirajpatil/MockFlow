@@ -2,11 +2,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Save, Play, Download, Upload, Trash2, Undo2, Redo2, FileJson, Keyboard, Rocket, Copy, CheckCircle2, Database, Zap } from 'lucide-react';
+import { Save, Play, Download, Upload, Trash2, Undo2, Redo2, FileJson, Keyboard, Rocket, Copy, CheckCircle2, Database, Zap, KeyRound } from 'lucide-react';
 import useStore from '@/store/useStore';
 import { WorkflowExecutor } from '@/lib/productionExecutor';
 import { saveWorkflow, updateWorkflow, deployWorkflow, undeployWorkflow, loadWorkflow } from '@/lib/api';
 import { templates } from '@/lib/templates';
+import { getOrCreateWorkspace, restoreWorkspace, shortLabel } from '@/lib/workspace';
 import { useToast } from '@/hooks/use-toast';
 import WorkspaceTunnelSettings from '@/components/WorkspaceTunnelSettings';
 import {
@@ -48,7 +49,10 @@ export default function Toolbar() {
 
     // Workspace
     const [workspace, setWorkspace] = useState<string>('');
-    const [tempWorkspace, setTempWorkspace] = useState('');
+    const [restoreCode, setRestoreCode] = useState('');
+    const [restoreError, setRestoreError] = useState<string | null>(null);
+    const [showRestore, setShowRestore] = useState(false);
+    const [workspaceCopied, setWorkspaceCopied] = useState(false);
 
     // Workflow metadata
     const [workflowId, setWorkflowId] = useState<string | null>(null);
@@ -59,16 +63,10 @@ export default function Toolbar() {
     const [deploying, setDeploying] = useState(false);
     const [copied, setCopied] = useState(false);
 
-    // Load workspace from localStorage on mount
+    // Workspace ID is generated locally on first visit — never user-typed, so two
+    // people can never collide into the same workspace by picking the same name.
     useEffect(() => {
-        const savedWorkspace = localStorage.getItem('mockflow_workspace');
-        if (savedWorkspace) {
-            setWorkspace(savedWorkspace);
-        } else {
-            // Suggest a random, hard-to-guess workspace name (it namespaces your data)
-            setTempWorkspace(`ws-${Math.random().toString(36).slice(2, 8)}`);
-            setWorkspaceDialogOpen(true);
-        }
+        setWorkspace(getOrCreateWorkspace());
     }, []);
 
     // Open an existing workflow via /editor?id=... (from the workflows page)
@@ -413,9 +411,13 @@ export default function Toolbar() {
                         </div>
 
                         {workspace && (
-                            <span className="px-3 py-1.5 rounded-full bg-violet-500/20 text-violet-300 border border-violet-500/30 flex items-center gap-2">
-                                <Database className="w-3 h-3" /> {workspace}
-                            </span>
+                            <button
+                                onClick={() => setWorkspaceDialogOpen(true)}
+                                className="px-3 py-1.5 rounded-full bg-violet-500/20 text-violet-300 border border-violet-500/30 flex items-center gap-2 hover:bg-violet-500/30 transition-colors font-mono"
+                                title="View or restore your workspace"
+                            >
+                                <Database className="w-3 h-3" /> {shortLabel(workspace)}
+                            </button>
                         )}
                     </div>
                 </div>
@@ -550,50 +552,109 @@ export default function Toolbar() {
             </div>
 
 
-            {/* Workspace Setup Dialog */}
-            <Dialog open={workspaceDialogOpen} onOpenChange={setWorkspaceDialogOpen}>
-                <DialogContent className="border-indigo-100">
+            {/* Workspace Dialog — informational + recovery, never a place to type a new name */}
+            <Dialog
+                open={workspaceDialogOpen}
+                onOpenChange={(open) => {
+                    setWorkspaceDialogOpen(open);
+                    if (!open) {
+                        setShowRestore(false);
+                        setRestoreCode('');
+                        setRestoreError(null);
+                    }
+                }}
+            >
+                <DialogContent className="border-indigo-500/20">
                     <DialogHeader>
-                        <DialogTitle className="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">Welcome to MockFlow!</DialogTitle>
+                        <DialogTitle className="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">Your workspace</DialogTitle>
                         <DialogDescription>
-                            Choose a workspace name to isolate your workflows from other users
+                            Namespaces your workflows and API URLs. Generated automatically for this browser — nobody else can guess it.
                         </DialogDescription>
                     </DialogHeader>
 
-                    <div className="space-y-4">
-                        <div className="space-y-2">
-                            <Label>Workspace Name *</Label>
-                            <Input
-                                value={tempWorkspace}
-                                onChange={(e) => setTempWorkspace(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
-                                placeholder="my-workspace"
-                                autoFocus
-                                className="border-indigo-200 focus:border-indigo-400 focus:ring-indigo-400"
-                            />
-                            <p className="text-xs text-muted-foreground">
-                                Use lowercase letters, numbers, and hyphens only. This will be part of your API URLs.
-                            </p>
-                            {tempWorkspace && (
-                                <p className="text-xs text-violet-600">
-                                    Your endpoints will be: <code className="bg-violet-50 px-1 rounded">/api/{tempWorkspace}/...</code>
+                    {!showRestore ? (
+                        <div className="space-y-4">
+                            <div className="space-y-2">
+                                <Label>Workspace ID</Label>
+                                <div className="flex gap-2">
+                                    <Input value={workspace} readOnly className="font-mono text-xs border-indigo-500/20 bg-transparent" />
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        onClick={() => {
+                                            navigator.clipboard.writeText(workspace);
+                                            setWorkspaceCopied(true);
+                                            setTimeout(() => setWorkspaceCopied(false), 2000);
+                                        }}
+                                    >
+                                        {workspaceCopied ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                                    </Button>
+                                </div>
+                                <p className="text-xs text-violet-300">
+                                    Your endpoints look like: <code className="bg-violet-500/10 px-1 rounded">/api/{shortLabel(workspace)}.../...</code>
                                 </p>
-                            )}
-                        </div>
+                            </div>
 
-                        <Button
-                            onClick={() => {
-                                if (tempWorkspace.trim()) {
-                                    setWorkspace(tempWorkspace);
-                                    localStorage.setItem('mockflow_workspace', tempWorkspace);
-                                    setWorkspaceDialogOpen(false);
-                                }
-                            }}
-                            disabled={!tempWorkspace.trim()}
-                            className="w-full bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700"
-                        >
-                            Set Workspace
-                        </Button>
-                    </div>
+                            <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3">
+                                <p className="text-xs text-amber-300">
+                                    <span className="font-bold">Keep this private.</span> Anyone with this ID can see and edit everything in this workspace — treat it like a password, not a username.
+                                </p>
+                            </div>
+
+                            <Button variant="outline" className="w-full gap-2" onClick={() => setShowRestore(true)}>
+                                <KeyRound className="w-4 h-4" />
+                                Restore a workspace from another device
+                            </Button>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            <div className="space-y-2">
+                                <Label>Paste your workspace ID</Label>
+                                <Input
+                                    value={restoreCode}
+                                    onChange={(e) => {
+                                        setRestoreCode(e.target.value);
+                                        setRestoreError(null);
+                                    }}
+                                    placeholder="e.g. 3f2a9c1e-4b7d-4e2a-9c1e-4b7d4e2a9c1e"
+                                    autoFocus
+                                    className="font-mono text-xs border-indigo-500/20 bg-transparent"
+                                />
+                                <p className="text-xs text-muted-foreground">
+                                    Copy it from the Workspace panel on your other device.
+                                </p>
+                                {restoreError && <p className="text-xs text-destructive">{restoreError}</p>}
+                            </div>
+
+                            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
+                                <p className="text-xs text-red-300">
+                                    This replaces your current workspace ({shortLabel(workspace)}...) in this browser. If you haven't saved its ID elsewhere, you'll lose access to its workflows.
+                                </p>
+                            </div>
+
+                            <div className="flex gap-2">
+                                <Button variant="ghost" className="flex-1" onClick={() => setShowRestore(false)}>
+                                    Cancel
+                                </Button>
+                                <Button
+                                    className="flex-1 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700"
+                                    onClick={() => {
+                                        const result = restoreWorkspace(restoreCode);
+                                        if (!result.ok) {
+                                            setRestoreError(result.error || 'Invalid code');
+                                            return;
+                                        }
+                                        setWorkspace(getOrCreateWorkspace());
+                                        setShowRestore(false);
+                                        setWorkspaceDialogOpen(false);
+                                        toast({ title: 'Workspace restored' });
+                                    }}
+                                >
+                                    Restore
+                                </Button>
+                            </div>
+                        </div>
+                    )}
                 </DialogContent>
             </Dialog>
 
@@ -642,7 +703,7 @@ export default function Toolbar() {
 
             {/* Test Dialog */}
             <Dialog open={testDialogOpen} onOpenChange={setTestDialogOpen}>
-                <DialogContent className="max-w-3xl max-h-[80vh] border-indigo-100">
+                <DialogContent className="max-w-3xl max-h-[80vh] border-indigo-500/20">
                     <DialogHeader>
                         <DialogTitle>Test Workflow</DialogTitle>
                         <DialogDescription>
@@ -656,7 +717,7 @@ export default function Toolbar() {
                             <Textarea
                                 value={testRequest}
                                 onChange={(e) => setTestRequest(e.target.value)}
-                                className="font-mono text-xs border-indigo-200"
+                                className="font-mono text-xs border-indigo-500/20 bg-transparent"
                                 rows={8}
                             />
                         </div>
@@ -668,11 +729,11 @@ export default function Toolbar() {
                         {testResult && (
                             <div className="space-y-2">
                                 <Label>Result</Label>
-                                <ScrollArea className="h-[300px] border border-indigo-100 rounded-md p-4">
+                                <ScrollArea className="h-[300px] border border-indigo-500/20 rounded-md p-4">
                                     <div className="space-y-2">
                                         <div className="flex items-center gap-2">
                                             <span className="font-semibold">Status:</span>
-                                            <span className={testResult.success ? 'text-emerald-600' : 'text-red-600'}>
+                                            <span className={testResult.success ? 'text-emerald-400' : 'text-red-400'}>
                                                 {testResult.success ? 'Success' : 'Failed'}
                                             </span>
                                         </div>
@@ -687,7 +748,7 @@ export default function Toolbar() {
                                         {testResult.body && (
                                             <div className="space-y-1">
                                                 <span className="font-semibold">Response Body:</span>
-                                                <pre className="bg-indigo-50 p-2 rounded text-xs overflow-auto">
+                                                <pre className="bg-black/20 p-2 rounded text-xs overflow-auto">
                                                     {JSON.stringify(testResult.body, null, 2)}
                                                 </pre>
                                             </div>
@@ -695,8 +756,8 @@ export default function Toolbar() {
 
                                         {testResult.error && (
                                             <div className="space-y-1">
-                                                <span className="font-semibold text-red-600">Error:</span>
-                                                <pre className="bg-red-50 p-2 rounded text-xs text-red-600">
+                                                <span className="font-semibold text-red-400">Error:</span>
+                                                <pre className="bg-red-500/10 p-2 rounded text-xs text-red-300">
                                                     {testResult.error}
                                                 </pre>
                                             </div>
@@ -705,7 +766,7 @@ export default function Toolbar() {
                                         {testResult.logs && testResult.logs.length > 0 && (
                                             <div className="space-y-1">
                                                 <span className="font-semibold">Execution Logs:</span>
-                                                <pre className="bg-indigo-50 p-2 rounded text-xs overflow-auto">
+                                                <pre className="bg-black/20 p-2 rounded text-xs overflow-auto">
                                                     {testResult.logs.join('\n')}
                                                 </pre>
                                             </div>
@@ -720,7 +781,7 @@ export default function Toolbar() {
 
             {/* Deploy Success Dialog */}
             <Dialog open={deployDialogOpen} onOpenChange={setDeployDialogOpen}>
-                <DialogContent className="max-w-2xl border-indigo-100">
+                <DialogContent className="max-w-2xl border-indigo-500/20">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             <Rocket className="w-5 h-5 text-emerald-500" />
@@ -735,9 +796,9 @@ export default function Toolbar() {
                         <div className="space-y-2">
                             <Label>Endpoint URL</Label>
                             <div className="flex gap-2">
-                                <Input readOnly value={getEndpointUrl() || ''} className="font-mono text-xs" />
+                                <Input readOnly value={getEndpointUrl() || ''} className="font-mono text-xs bg-transparent" />
                                 <Button variant="outline" size="sm" onClick={copyEndpoint}>
-                                    {copied ? <CheckCircle2 className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+                                    {copied ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
                                 </Button>
                             </div>
                         </div>
@@ -761,7 +822,7 @@ export default function Toolbar() {
                         </Button>
 
                         {tryItResult && (
-                            <pre className="bg-indigo-50 p-3 rounded-md text-xs overflow-auto max-h-[200px] whitespace-pre-wrap">
+                            <pre className="bg-black/20 p-3 rounded-md text-xs overflow-auto max-h-[200px] whitespace-pre-wrap">
                                 {tryItResult}
                             </pre>
                         )}
@@ -771,7 +832,7 @@ export default function Toolbar() {
 
             {/* Templates Dialog */}
             <Dialog open={templatesDialogOpen} onOpenChange={setTemplatesDialogOpen}>
-                <DialogContent className="max-w-2xl border-indigo-100">
+                <DialogContent className="max-w-2xl border-indigo-500/20">
                     <DialogHeader>
                         <DialogTitle>Start from a template</DialogTitle>
                         <DialogDescription>
@@ -784,7 +845,7 @@ export default function Toolbar() {
                             <button
                                 key={template.id}
                                 onClick={() => handleLoadTemplate(template.id)}
-                                className="text-left p-4 rounded-xl border border-indigo-100 hover:border-indigo-300 hover:bg-indigo-50/50 transition-all"
+                                className="text-left p-4 rounded-xl border border-indigo-500/20 hover:border-indigo-400/40 hover:bg-indigo-500/10 transition-all"
                             >
                                 <div className="font-semibold text-sm mb-1">{template.name}</div>
                                 <div className="text-xs text-muted-foreground leading-relaxed">{template.description}</div>
@@ -796,7 +857,7 @@ export default function Toolbar() {
 
             {/* Keyboard Shortcuts Dialog */}
             <Dialog open={shortcutsDialogOpen} onOpenChange={setShortcutsDialogOpen}>
-                <DialogContent className="border-indigo-100">
+                <DialogContent className="border-indigo-500/20">
                     <DialogHeader>
                         <DialogTitle>Keyboard Shortcuts</DialogTitle>
                         <DialogDescription>
@@ -807,27 +868,27 @@ export default function Toolbar() {
                     <div className="space-y-3">
                         <div className="flex justify-between items-center">
                             <span className="text-sm">Save workflow</span>
-                            <kbd className="px-2 py-1 text-xs font-mono bg-indigo-50 rounded border border-indigo-100">Ctrl+S</kbd>
+                            <kbd className="px-2 py-1 text-xs font-mono bg-indigo-500/10 rounded border border-indigo-500/20">Ctrl+S</kbd>
                         </div>
                         <div className="flex justify-between items-center">
                             <span className="text-sm">Undo</span>
-                            <kbd className="px-2 py-1 text-xs font-mono bg-indigo-50 rounded border border-indigo-100">Ctrl+Z</kbd>
+                            <kbd className="px-2 py-1 text-xs font-mono bg-indigo-500/10 rounded border border-indigo-500/20">Ctrl+Z</kbd>
                         </div>
                         <div className="flex justify-between items-center">
                             <span className="text-sm">Redo</span>
-                            <kbd className="px-2 py-1 text-xs font-mono bg-indigo-50 rounded border border-indigo-100">Ctrl+Shift+Z</kbd>
+                            <kbd className="px-2 py-1 text-xs font-mono bg-indigo-500/10 rounded border border-indigo-500/20">Ctrl+Shift+Z</kbd>
                         </div>
                         <div className="flex justify-between items-center">
                             <span className="text-sm">Delete selected</span>
-                            <kbd className="px-2 py-1 text-xs font-mono bg-indigo-50 rounded border border-indigo-100">Delete</kbd>
+                            <kbd className="px-2 py-1 text-xs font-mono bg-indigo-500/10 rounded border border-indigo-500/20">Delete</kbd>
                         </div>
                         <div className="flex justify-between items-center">
                             <span className="text-sm">Fit view</span>
-                            <kbd className="px-2 py-1 text-xs font-mono bg-indigo-50 rounded border border-indigo-100">F</kbd>
+                            <kbd className="px-2 py-1 text-xs font-mono bg-indigo-500/10 rounded border border-indigo-500/20">F</kbd>
                         </div>
                         <div className="flex justify-between items-center">
                             <span className="text-sm">Show shortcuts</span>
-                            <kbd className="px-2 py-1 text-xs font-mono bg-indigo-50 rounded border border-indigo-100">Ctrl+/</kbd>
+                            <kbd className="px-2 py-1 text-xs font-mono bg-indigo-500/10 rounded border border-indigo-500/20">Ctrl+/</kbd>
                         </div>
                     </div>
                 </DialogContent>
