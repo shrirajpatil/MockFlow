@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Workflow, Shield, Rocket, Terminal, ChevronRight, Sparkles, Inbox, Shuffle, Database, GitBranch, Send, Layers, MousePointerClick, PlugZap, Users } from 'lucide-react';
+import { ArrowRight, Workflow, Shield, Rocket, Terminal, ChevronRight, Sparkles, Inbox, Shuffle, Database, GitBranch, Send, Layers, MousePointerClick, PlugZap, Users, Zap, Dices } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import SiteHeader from '@/components/marketing/SiteHeader';
 import SiteFooter from '@/components/marketing/SiteFooter';
@@ -10,11 +10,11 @@ import SiteFooter from '@/components/marketing/SiteFooter';
 const FAQ_ITEMS = [
   {
     q: 'Is MockFlow free to use?',
-    a: 'Yes. MockFlow is free to use — build workflows, test them in the editor, and deploy live mock endpoints without a credit card.',
+    a: 'Yes. MockFlow is free to use: build workflows, test them in the editor, and deploy live mock endpoints without a credit card.',
   },
   {
     q: 'Do I need to write any backend code?',
-    a: 'No. Every endpoint is assembled visually from nodes — request, validation, transformation, conditional, state, and response. There is no server code to write or deploy.',
+    a: 'No. Every endpoint is assembled visually from nodes for request, validation, transformation, conditional, state, and response. There is no server code to write or deploy.',
   },
   {
     q: 'Can a mock API remember state across requests?',
@@ -22,11 +22,11 @@ const FAQ_ITEMS = [
   },
   {
     q: 'Can I mock an API that does not exist yet?',
-    a: 'That is the main use case. Frontend and QA teams use MockFlow to stand up a realistic endpoint — with validation and branching logic — before the real backend is built, so nobody has to wait.',
+    a: 'That is the main use case. Frontend and QA teams use MockFlow to stand up a realistic endpoint, complete with validation and branching logic, before the real backend is built, so nobody has to wait.',
   },
   {
     q: 'Can I test against an API running on my own machine?',
-    a: 'Yes. The bundled tunnel agent exposes a local API through ngrok so a cloud-deployed MockFlow workflow can call it during local development.',
+    a: 'Yes. Click Local APIs in the editor toolbar to connect one with a no-signup SSH tunnel, or use the optional bundled ngrok agent for a persistent connection.',
   },
 ];
 
@@ -235,8 +235,8 @@ export default function LandingPage() {
 
           {/* Subheadline */}
           <p className="text-lg lg:text-xl text-indigo-200/60 max-w-2xl mx-auto mb-12 leading-relaxed">
-            MockFlow is a visual workflow builder for creating, testing, and deploying mock APIs.
-            Design your endpoints with <span className="text-indigo-100">drag-and-drop</span> nodes.
+            MockFlow is a free visual tool for building, testing, and deploying mock REST APIs without writing backend code.
+            Design your endpoints with <span className="text-indigo-100">drag-and-drop</span> nodes and get a live HTTP endpoint in under a minute.
           </p>
 
           {/* CTAs */}
@@ -369,12 +369,14 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-3 gap-6">
             {[
               // Tailwind can't generate interpolated class names, so each card carries full class strings
-              { icon: Workflow, title: 'Visual Workflow', desc: 'Build complex API logic with an intuitive drag-and-drop interface — no backend code required.', box: 'from-violet-500/20 to-violet-600/10 border-violet-500/30', text: 'text-violet-400' },
-              { icon: Shield, title: 'Built-in Validation', desc: 'Add request validation — required fields, types, regex, min/max — with clear error responses.', box: 'from-blue-500/20 to-blue-600/10 border-blue-500/30', text: 'text-blue-400' },
+              { icon: Workflow, title: 'Visual Workflow', desc: 'Build complex API logic with an intuitive drag-and-drop interface. No backend code required.', box: 'from-violet-500/20 to-violet-600/10 border-violet-500/30', text: 'text-violet-400' },
+              { icon: Shield, title: 'Built-in Validation', desc: 'Add request validation for required fields, types, regex, and min/max, with clear error responses.', box: 'from-blue-500/20 to-blue-600/10 border-blue-500/30', text: 'text-blue-400' },
               { icon: Rocket, title: 'One-Click Deploy', desc: 'Deploy your mock API instantly to a live endpoint you can curl from anywhere.', box: 'from-emerald-500/20 to-emerald-600/10 border-emerald-500/30', text: 'text-emerald-400' },
               { icon: GitBranch, title: 'Conditional Branching', desc: 'Route requests through a safe expression evaluator to simulate real business logic.', box: 'from-amber-500/20 to-orange-600/10 border-amber-500/30', text: 'text-amber-400' },
-              { icon: Database, title: 'Stateful Mocks', desc: 'Persist state across requests with Redis — simulate carts, counters, and sessions.', box: 'from-fuchsia-500/20 to-pink-600/10 border-fuchsia-500/30', text: 'text-fuchsia-400' },
+              { icon: Database, title: 'Stateful Mocks', desc: 'Persist state across requests with Redis to simulate carts, counters, and sessions.', box: 'from-fuchsia-500/20 to-pink-600/10 border-fuchsia-500/30', text: 'text-fuchsia-400' },
               { icon: Layers, title: 'Ready-Made Templates', desc: 'Start from a library of workflow templates instead of an empty canvas.', box: 'from-cyan-500/20 to-sky-600/10 border-cyan-500/30', text: 'text-cyan-400' },
+              { icon: Zap, title: 'Chaos Mode', desc: 'Inject random latency or failures into any response to test how your frontend handles a flaky real API.', box: 'from-fuchsia-500/20 to-purple-600/10 border-fuchsia-500/30', text: 'text-fuchsia-400' },
+              { icon: Dices, title: 'Built-in Fake Data', desc: 'Generate realistic names, emails, and IDs on every call with a single template token. No extra library.', box: 'from-teal-500/20 to-emerald-600/10 border-teal-500/30', text: 'text-teal-400' },
             ].map((f, i) => (
               <div
                 key={i}
@@ -406,7 +408,7 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-3 gap-8">
             {[
               { icon: MousePointerClick, step: '01', title: 'Design the flow', desc: 'Drag request, validation, transformation, conditional, state, and response nodes onto the canvas and wire them together.' },
-              { icon: PlugZap, step: '02', title: 'Test in the editor', desc: 'Run the workflow with the same engine that serves production, right inside the canvas — no deploy needed to iterate.' },
+              { icon: PlugZap, step: '02', title: 'Test in the editor', desc: 'Run the workflow with the same engine that serves production, right inside the canvas, with no deploy needed to iterate.' },
               { icon: Rocket, step: '03', title: 'Deploy and share', desc: 'Click Deploy to get a live HTTP endpoint at /api/{workspace}/{path} that anyone on your team can curl.' },
             ].map((s, i) => (
               <div key={i} className="relative p-6 rounded-2xl bg-[#0d1024]/50 border border-indigo-500/10">
@@ -439,7 +441,7 @@ export default function LandingPage() {
               { icon: Terminal, title: 'Frontend development', desc: 'Build and ship UI against a realistic API before the real backend exists, so nobody is blocked waiting on another team.' },
               { icon: Shield, title: 'QA & integration testing', desc: 'Simulate edge cases, error codes, and flaky third-party responses that are hard to reproduce against a real service.' },
               { icon: Users, title: 'Demos & sales prototypes', desc: 'Stand up a convincing, stateful API for a demo or hackathon without provisioning real infrastructure.' },
-              { icon: PlugZap, title: 'Third-party API simulation', desc: 'Mock a vendor API you don’t control yet — including rate limits, auth errors, and paginated responses.' },
+              { icon: PlugZap, title: 'Third-party API simulation', desc: 'Mock a vendor API you don’t control yet, including rate limits, auth errors, and paginated responses.' },
             ].map((u, i) => (
               <div key={i} className="flex items-start gap-4 p-6 rounded-2xl bg-[#0d1024]/50 border border-indigo-500/10 hover:border-indigo-500/30 transition-all">
                 <div className="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-violet-500/20 to-indigo-600/10 border border-violet-500/30 flex items-center justify-center">

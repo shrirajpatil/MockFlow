@@ -10,8 +10,9 @@ import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Trash2, Settings2, Sparkles, Terminal } from 'lucide-react';
+import { Plus, Trash2, Settings2, Sparkles, Terminal, Copy, Check, Zap } from 'lucide-react';
 import type { NodeData } from '@/types/nodes';
+import { FAKE_TOKENS } from '@/lib/fakeData';
 
 const NodeConfigPanel = () => {
     const { nodes, setNodes } = useStore();
@@ -155,7 +156,7 @@ const RequestConfig = ({ data, updateData }: any) => {
 };
 
 /**
- * Shown when a Request node's URL points at localhost/127.0.0.1 — the cloud
+ * Shown when a Request node's URL points at localhost/127.0.0.1. The cloud
  * can't reach it directly, so this points the user at the "Local APIs"
  * dialog in the toolbar (see WorkspaceTunnelSettings), which is the single
  * source of truth for setup steps.
@@ -164,12 +165,12 @@ const LocalhostHint = () => {
     return (
         <div className="bg-amber-500/10 border border-amber-400/30 rounded-lg p-3 space-y-1.5">
             <p className="text-xs text-amber-200">
-                <span className="font-bold text-amber-300">Heads up:</span> this URL points at your own computer — MockFlow&apos;s
+                <span className="font-bold text-amber-300">Heads up:</span> this URL points at your own computer, and MockFlow&apos;s
                 cloud can&apos;t reach it directly.
             </p>
             <p className="text-xs text-amber-200/80 flex items-center gap-1.5">
                 <Terminal className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                Click <span className="font-medium text-amber-100">Local APIs</span> in the toolbar to connect it — no signup needed.
+                Click <span className="font-medium text-amber-100">Local APIs</span> in the toolbar to connect it. No signup needed.
             </p>
         </div>
     );
@@ -288,11 +289,11 @@ const TransformationConfig = ({ data, updateData }: any) => {
                         </Button>
                     </div>
                     <div className="space-y-1">
-                        <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Source — where the value comes from</span>
+                        <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Source: where the value comes from</span>
                         <Input value={t.source} onChange={(e) => updateTransform(idx, { source: e.target.value })} placeholder="request.body.name" className={`${inputStyles} font-mono`} />
                     </div>
                     <div className="space-y-1">
-                        <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Target — the name to store it under</span>
+                        <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Target: the name to store it under</span>
                         <Input value={t.target} onChange={(e) => updateTransform(idx, { target: e.target.value })} placeholder="user.name" className={`${inputStyles} font-mono`} />
                     </div>
                 </div>
@@ -301,28 +302,150 @@ const TransformationConfig = ({ data, updateData }: any) => {
     );
 };
 
-const ResponseConfig = ({ data, updateData }: any) => (
-    <div className="space-y-4">
-        <div className="space-y-2">
-            <Label className={labelStyles}>Status Code</Label>
-            <Input value={data.statusCode || 200} onChange={(e) => updateData({ statusCode: parseInt(e.target.value) || 200 })} type="number" className={inputStyles} />
-        </div>
-        <div className="space-y-2">
-            <Label className={labelStyles}>Body Template</Label>
-            <Textarea value={data.bodyTemplate || ''} onChange={(e) => updateData({ bodyTemplate: e.target.value })} className={textareaStyles} rows={6} placeholder='{"status": "success", "data": {...}}' />
-            <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-2.5 space-y-1">
-                <p className="text-[11px] text-emerald-300">
-                    Must be valid JSON. Insert dynamic values with <code className="bg-black/20 px-1 rounded">{'{{'}path{'}}'}</code>:
+const ResponseConfig = ({ data, updateData }: any) => {
+    const chaos = data.chaos || {};
+    const updateChaos = (updates: any) => updateData({ chaos: { ...chaos, ...updates } });
+
+    return (
+        <div className="space-y-4">
+            <div className="space-y-2">
+                <Label className={labelStyles}>Status Code</Label>
+                <Input value={data.statusCode || 200} onChange={(e) => updateData({ statusCode: parseInt(e.target.value) || 200 })} type="number" className={inputStyles} />
+            </div>
+            <div className="space-y-2">
+                <Label className={labelStyles}>Body Template</Label>
+                <Textarea value={data.bodyTemplate || ''} onChange={(e) => updateData({ bodyTemplate: e.target.value })} className={textareaStyles} rows={6} placeholder='{"status": "success", "data": {...}}' />
+                <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-2.5 space-y-1">
+                    <p className="text-[11px] text-emerald-300">
+                        Must be valid JSON. Insert dynamic values with <code className="bg-black/20 px-1 rounded">{'{{'}path{'}}'}</code>:
+                    </p>
+                    <ul className="text-[11px] text-emerald-300/80 space-y-0.5 pl-3 list-disc">
+                        <li><code className="bg-black/20 px-1 rounded">{'{{'}request.body.name{'}}'}</code>: data from the incoming request</li>
+                        <li><code className="bg-black/20 px-1 rounded">{'{{'}variables.user{'}}'}</code>: a value set by a Transformation node</li>
+                        <li><code className="bg-black/20 px-1 rounded">{'{{'}state.count{'}}'}</code>: a value set by a State node</li>
+                        <li><code className="bg-black/20 px-1 rounded">{'{{'}fake.email{'}}'}</code>: realistic random data, a fresh value every call</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                    <Label className={labelStyles}>Fake data tokens</Label>
+                    <span className="text-[10px] text-zinc-500">Click to copy</span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                    {FAKE_TOKENS.map((token) => (
+                        <FakeTokenChip key={token} token={token} />
+                    ))}
+                </div>
+            </div>
+
+            <Separator className="bg-white/[0.08]" />
+
+            <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                        <Zap className="w-3.5 h-3.5 text-fuchsia-400" />
+                        <Label className={labelStyles}>Chaos mode</Label>
+                    </div>
+                    <button
+                        type="button"
+                        role="switch"
+                        aria-checked={!!chaos.enabled}
+                        onClick={() => updateChaos({ enabled: !chaos.enabled })}
+                        className={`relative w-9 h-5 rounded-full transition-colors shrink-0 ${chaos.enabled ? 'bg-fuchsia-500' : 'bg-zinc-700'}`}
+                    >
+                        <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${chaos.enabled ? 'translate-x-4' : ''}`} />
+                    </button>
+                </div>
+                <p className="text-[11px] text-zinc-500">
+                    Randomly slow down or fail this response, to test how your frontend handles a flaky real-world API.
                 </p>
-                <ul className="text-[11px] text-emerald-300/80 space-y-0.5 pl-3 list-disc">
-                    <li><code className="bg-black/20 px-1 rounded">{'{{'}request.body.name{'}}'}</code> — data from the incoming request</li>
-                    <li><code className="bg-black/20 px-1 rounded">{'{{'}variables.user{'}}'}</code> — a value set by a Transformation node</li>
-                    <li><code className="bg-black/20 px-1 rounded">{'{{'}state.count{'}}'}</code> — a value set by a State node</li>
-                </ul>
+
+                {chaos.enabled && (
+                    <div className="bg-fuchsia-500/10 border border-fuchsia-500/20 rounded-xl p-4 space-y-3">
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-1">
+                                <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Latency min (ms)</span>
+                                <Input
+                                    type="number"
+                                    min={0}
+                                    max={5000}
+                                    value={chaos.latencyMinMs ?? 0}
+                                    onChange={(e) => updateChaos({ latencyMinMs: Math.max(0, Math.min(5000, parseInt(e.target.value) || 0)) })}
+                                    className={inputStyles}
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Latency max (ms)</span>
+                                <Input
+                                    type="number"
+                                    min={0}
+                                    max={5000}
+                                    value={chaos.latencyMaxMs ?? 0}
+                                    onChange={(e) => updateChaos({ latencyMaxMs: Math.max(0, Math.min(5000, parseInt(e.target.value) || 0)) })}
+                                    className={inputStyles}
+                                />
+                            </div>
+                        </div>
+                        <div className="space-y-1">
+                            <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Error rate (% of requests)</span>
+                            <Input
+                                type="number"
+                                min={0}
+                                max={100}
+                                value={chaos.errorRate ?? 0}
+                                onChange={(e) => updateChaos({ errorRate: Math.max(0, Math.min(100, parseInt(e.target.value) || 0)) })}
+                                className={inputStyles}
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Error status codes (comma-separated)</span>
+                            <Input
+                                value={(chaos.errorStatusCodes || [500]).join(', ')}
+                                onChange={(e) => updateChaos({
+                                    errorStatusCodes: e.target.value
+                                        .split(',')
+                                        .map((v: string) => parseInt(v.trim()))
+                                        .filter((n: number) => !isNaN(n)),
+                                })}
+                                placeholder="500, 502, 503"
+                                className={`${inputStyles} font-mono`}
+                            />
+                        </div>
+                        <p className="text-[10px] text-fuchsia-300/70">
+                            Latency is capped at 5s. On a failed roll, the body above is replaced with a simulated error.
+                            Your real template is untouched and still used the rest of the time.
+                        </p>
+                    </div>
+                )}
             </div>
         </div>
-    </div>
-);
+    );
+};
+
+const FakeTokenChip = ({ token }: { token: string }) => {
+    const [copied, setCopied] = useState(false);
+    const value = `{{fake.${token}}}`;
+
+    const copy = () => {
+        navigator.clipboard.writeText(value);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+    };
+
+    return (
+        <button
+            type="button"
+            onClick={copy}
+            title={`Copy ${value}`}
+            className="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-1 rounded-md bg-zinc-800/70 border border-zinc-700/60 text-zinc-300 hover:border-violet-500/50 hover:text-white transition-colors"
+        >
+            {copied ? <Check className="w-2.5 h-2.5 text-emerald-400" /> : <Copy className="w-2.5 h-2.5" />}
+            fake.{token}
+        </button>
+    );
+};
 
 const StateConfig = ({ data, updateData }: any) => {
     const operation = data.operation || 'set';
@@ -331,7 +454,7 @@ const StateConfig = ({ data, updateData }: any) => {
             <div className="bg-cyan-500/10 border border-cyan-500/20 rounded-lg p-2.5">
                 <p className="text-[11px] text-cyan-300">
                     State persists <strong>across separate requests</strong> to this workflow (e.g. a POST that saves
-                    data, and a later GET that reads it back) — unlike Transformation, which only lasts one request.
+                    data, and a later GET that reads it back), unlike Transformation, which only lasts one request.
                 </p>
             </div>
             <div className="space-y-2">
@@ -374,7 +497,7 @@ const ConditionalConfig = ({ data, updateData }: any) => (
             <Textarea value={data.condition || ''} onChange={(e) => updateData({ condition: e.target.value })} className={textareaStyles} rows={3} placeholder="request.body.age >= 18" />
             <div className="bg-fuchsia-500/10 border border-fuchsia-500/20 rounded-lg p-2.5 space-y-1.5">
                 <p className="text-[11px] text-fuchsia-300">
-                    A simple expression, evaluated safely (not full JavaScript — no function calls like{' '}
+                    A simple expression, evaluated safely (not full JavaScript, so no function calls like{' '}
                     <code className="bg-black/20 px-1 rounded">.includes()</code>).
                 </p>
                 <p className="text-[11px] text-fuchsia-300/80">
@@ -399,7 +522,7 @@ const ConditionalConfig = ({ data, updateData }: any) => (
         </div>
         <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-2.5">
             <p className="text-[11px] text-zinc-400">
-                Connect this node&apos;s two outgoing handles to different next steps — the bottom-left handle fires on{' '}
+                Connect this node&apos;s two outgoing handles to different next steps. The bottom-left handle fires on{' '}
                 <span className="text-emerald-400">true</span>, bottom-right on <span className="text-red-400">false</span>.
             </p>
         </div>

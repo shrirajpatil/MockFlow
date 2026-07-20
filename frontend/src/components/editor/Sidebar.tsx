@@ -7,10 +7,10 @@ import { Inbox, Shield, Shuffle, Send, Database, GitBranch, Sparkles } from 'luc
 
 export default function Sidebar() {
     const nodeTypes = [
-        { type: 'request', label: 'Request', icon: Inbox, desc: 'API endpoint', gradient: 'from-blue-500 to-indigo-600', tooltip: 'Where a call comes in — set the method and path, e.g. GET /users/:id.' },
+        { type: 'request', label: 'Request', icon: Inbox, desc: 'API endpoint', gradient: 'from-blue-500 to-indigo-600', tooltip: 'Where a call comes in. Set the method and path, e.g. GET /users/:id.' },
         { type: 'validation', label: 'Validation', icon: Shield, desc: 'Validate data', gradient: 'from-violet-500 to-purple-600', tooltip: "Reject bad input before your logic runs, e.g. require an email field." },
         { type: 'transformation', label: 'Transform', icon: Shuffle, desc: 'Modify data', gradient: 'from-amber-500 to-orange-600', tooltip: 'Copy or reshape a value for later, e.g. combine first+last name into fullName.' },
-        { type: 'response', label: 'Response', icon: Send, desc: 'Return result', gradient: 'from-emerald-500 to-teal-600', tooltip: "What gets sent back — status code and JSON body, e.g. 200 with {status:'ok'}." },
+        { type: 'response', label: 'Response', icon: Send, desc: 'Return result', gradient: 'from-emerald-500 to-teal-600', tooltip: "What gets sent back: status code and JSON body, e.g. 200 with {status:'ok'}." },
         { type: 'state', label: 'State', icon: Database, desc: 'Store data', gradient: 'from-cyan-500 to-blue-600', tooltip: 'Remember something between separate requests, e.g. a counter that increments each call.' },
         { type: 'conditional', label: 'Conditional', icon: GitBranch, desc: 'If/else logic', gradient: 'from-fuchsia-500 to-pink-600', tooltip: "Branch the flow, e.g. respond 401 if the request has no token." },
     ];

@@ -168,7 +168,7 @@ const EditorCanvasContent = () => {
     );
 };
 
-/** Shown only on a blank canvas — points new users at the ways to start. */
+/** Shown only on a blank canvas. Points new users at the ways to start. */
 const EmptyCanvasHint = () => {
     const { nodes, setNodes, setEdges } = useStore();
 

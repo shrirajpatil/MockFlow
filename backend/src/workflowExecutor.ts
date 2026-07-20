@@ -1,4 +1,5 @@
 import { evaluateCondition } from './lib/safeEval.js';
+import { generateFake } from './lib/fakeData.js';
 
 /**
  * Server-side workflow executor: runs a deployed workflow (ReactFlow
@@ -216,13 +217,17 @@ export class ServerWorkflowExecutor {
         return nextNode ? this.executeNode(nextNode) : Promise.resolve(null);
     }
 
-    private buildResponse(data: any): Omit<ExecutionResult, 'logs'> {
+    private async buildResponse(data: any): Promise<Omit<ExecutionResult, 'logs'>> {
         const statusCode = data.statusCode || 200;
         this.log(`Response: ${statusCode}`);
 
         let bodyText = data.bodyTemplate || '{}';
-        bodyText = bodyText.replace(/\{\{(\w+(?:\.\w+)*)\}\}/g, (_match: string, path: string) => {
-            const value = this.getValueFromPath(path);
+        // Tolerate both {{path}} and "{{path}}" authoring styles — a quoted
+        // token is consumed whole so a string value isn't double-quoted into
+        // invalid JSON, which used to fail silently and fall back to a raw
+        // string body instead of the parsed object the user expected.
+        bodyText = bodyText.replace(/"?\{\{(\w+(?:\.\w+)*)\}\}"?/g, (_match: string, path: string) => {
+            const value = this.resolvePath(path);
             return JSON.stringify(value === undefined ? null : value);
         });
 
@@ -238,17 +243,61 @@ export class ServerWorkflowExecutor {
             if (h.key) headers[h.key] = h.value;
         }
 
-        return { statusCode, headers, body };
+        return this.applyChaos(data.chaos, { statusCode, headers, body });
+    }
+
+    /**
+     * Chaos mode: optionally delays the response and/or replaces it with a
+     * simulated failure, so users can test how their frontend handles a
+     * slow or flaky API without needing a real one to misbehave on demand.
+     * Latency is capped at 5s regardless of configured value, as a guard
+     * against a deployed endpoint hanging indefinitely.
+     */
+    private async applyChaos(
+        chaos: { enabled?: boolean; latencyMinMs?: number; latencyMaxMs?: number; errorRate?: number; errorStatusCodes?: number[] } | undefined,
+        response: Omit<ExecutionResult, 'logs'>
+    ): Promise<Omit<ExecutionResult, 'logs'>> {
+        if (!chaos?.enabled) return response;
+
+        const minMs = Math.max(0, Math.min(Number(chaos.latencyMinMs) || 0, 5000));
+        const maxMs = Math.max(minMs, Math.min(Number(chaos.latencyMaxMs) || 0, 5000));
+        if (maxMs > 0) {
+            const delay = minMs === maxMs ? minMs : Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
+            this.log(`Chaos: delaying ${delay}ms`);
+            await new Promise((resolve) => setTimeout(resolve, delay));
+        }
+
+        const errorRate = Math.max(0, Math.min(Number(chaos.errorRate) || 0, 100));
+        if (errorRate > 0 && Math.random() * 100 < errorRate) {
+            const codes = Array.isArray(chaos.errorStatusCodes) && chaos.errorStatusCodes.length > 0
+                ? chaos.errorStatusCodes
+                : [500];
+            const statusCode = codes[Math.floor(Math.random() * codes.length)]!;
+            this.log(`Chaos: injecting simulated failure (${statusCode})`);
+            return {
+                statusCode,
+                headers: response.headers,
+                body: { error: 'Simulated failure (chaos mode)', statusCode },
+            };
+        }
+
+        return response;
     }
 
     /** Replace {{path}} in a string; a template that is exactly one placeholder keeps the value's type. */
     private renderTemplateValue(template: string): any {
         const exact = /^\{\{(\w+(?:\.\w+)*)\}\}$/.exec(template.trim());
-        if (exact) return this.getValueFromPath(exact[1]!);
+        if (exact) return this.resolvePath(exact[1]!);
         return template.replace(/\{\{(\w+(?:\.\w+)*)\}\}/g, (_m, path: string) => {
-            const value = this.getValueFromPath(path);
+            const value = this.resolvePath(path);
             return typeof value === 'string' ? value : JSON.stringify(value ?? null);
         });
+    }
+
+    /** {{fake.*}} generates a random value instead of reading the request context. */
+    private resolvePath(path: string): any {
+        if (path.startsWith('fake.')) return generateFake(path.slice(5));
+        return this.getValueFromPath(path);
     }
 
     private getValueFromPath(path: string): any {

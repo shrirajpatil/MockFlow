@@ -28,7 +28,7 @@ export default function OnboardingGuide({ open, onClose }: OnboardingGuideProps)
     const steps = [
         {
             title: 'Welcome to MockFlow',
-            description: 'Design, test, and deploy mock APIs — no backend code required',
+            description: 'Design, test, and deploy mock APIs. No backend code required',
             icon: <Rocket className="w-12 h-12 text-indigo-500" />,
             content: (
                 <div className="space-y-4">
@@ -41,19 +41,19 @@ export default function OnboardingGuide({ open, onClose }: OnboardingGuideProps)
                         <ul className="space-y-2 text-sm text-indigo-300/80">
                             <li className="flex items-start gap-2">
                                 <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0" />
-                                <span><strong>Build</strong> — drag nodes onto the canvas and connect them</span>
+                                <span><strong>Build</strong>: drag nodes onto the canvas and connect them</span>
                             </li>
                             <li className="flex items-start gap-2">
                                 <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0" />
-                                <span><strong>Test</strong> — run it instantly in the browser, no deploy needed</span>
+                                <span><strong>Test</strong>: run it instantly in the browser, no deploy needed</span>
                             </li>
                             <li className="flex items-start gap-2">
                                 <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0" />
-                                <span><strong>Save</strong> — store the workflow to come back to later</span>
+                                <span><strong>Save</strong>: store the workflow to come back to later</span>
                             </li>
                             <li className="flex items-start gap-2">
                                 <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0" />
-                                <span><strong>Deploy</strong> — get a live URL you can call with curl or any HTTP client</span>
+                                <span><strong>Deploy</strong>: get a live URL you can call with curl or any HTTP client</span>
                             </li>
                         </ul>
                     </div>
@@ -61,7 +61,7 @@ export default function OnboardingGuide({ open, onClose }: OnboardingGuideProps)
             ),
         },
         {
-            title: 'Step 1 — Build a workflow',
+            title: 'Step 1: Build a workflow',
             description: 'Every workflow starts with a Request node and ends with a Response node',
             icon: <MousePointerClick className="w-12 h-12 text-violet-500" />,
             content: (
@@ -76,7 +76,7 @@ export default function OnboardingGuide({ open, onClose }: OnboardingGuideProps)
                             </div>
                             <div className="bg-white/5 rounded p-3 border border-violet-500/20">
                                 <div className="font-medium text-violet-300">Response</div>
-                                <div className="text-xs text-indigo-200/40 mt-1">What gets sent back — status code + JSON body</div>
+                                <div className="text-xs text-indigo-200/40 mt-1">What gets sent back: status code + JSON body</div>
                             </div>
                         </div>
                     </div>
@@ -85,10 +85,10 @@ export default function OnboardingGuide({ open, onClose }: OnboardingGuideProps)
                             Add these later, only when your logic needs them
                         </h4>
                         <ul className="space-y-1.5 text-xs text-indigo-200/50">
-                            <li><span className="text-indigo-200/80 font-medium">Validation</span> — reject requests missing required fields</li>
-                            <li><span className="text-indigo-200/80 font-medium">Transformation</span> — reshape data before it reaches the response</li>
-                            <li><span className="text-indigo-200/80 font-medium">Conditional</span> — branch the flow, e.g. a different response if unauthorized</li>
-                            <li><span className="text-indigo-200/80 font-medium">State</span> — remember data between separate requests</li>
+                            <li><span className="text-indigo-200/80 font-medium">Validation</span>: reject requests missing required fields</li>
+                            <li><span className="text-indigo-200/80 font-medium">Transformation</span>: reshape data before it reaches the response</li>
+                            <li><span className="text-indigo-200/80 font-medium">Conditional</span>: branch the flow, e.g. a different response if unauthorized</li>
+                            <li><span className="text-indigo-200/80 font-medium">State</span>: remember data between separate requests</li>
                         </ul>
                     </div>
                     <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3">
@@ -101,7 +101,7 @@ export default function OnboardingGuide({ open, onClose }: OnboardingGuideProps)
             ),
         },
         {
-            title: 'Step 2 — Configure & test',
+            title: 'Step 2: Configure and test',
             description: 'Click any node to edit it, then run your workflow without deploying',
             icon: <PlayCircle className="w-12 h-12 text-emerald-500" />,
             content: (
@@ -113,7 +113,7 @@ export default function OnboardingGuide({ open, onClose }: OnboardingGuideProps)
                                 <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-200 font-bold shrink-0">1</div>
                                 <div>
                                     <div className="font-medium text-emerald-200">Click a node</div>
-                                    <div className="text-xs text-emerald-300/60">Its settings open in the panel on the right — every field there has a short hint under it</div>
+                                    <div className="text-xs text-emerald-300/60">Its settings open in the panel on the right. Every field there has a short hint under it</div>
                                 </div>
                             </div>
                             <div className="flex items-start gap-3">
@@ -127,7 +127,7 @@ export default function OnboardingGuide({ open, onClose }: OnboardingGuideProps)
                                 <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-200 font-bold shrink-0">3</div>
                                 <div>
                                     <div className="font-medium text-emerald-200">Click &quot;Test&quot; in the toolbar</div>
-                                    <div className="text-xs text-emerald-300/60">Runs the exact same logic that will run once deployed — see the result immediately</div>
+                                    <div className="text-xs text-emerald-300/60">Runs the exact same logic that will run once deployed, so you see the result immediately</div>
                                 </div>
                             </div>
                         </div>
@@ -136,7 +136,7 @@ export default function OnboardingGuide({ open, onClose }: OnboardingGuideProps)
                         <p className="text-sm text-blue-300">
                             🔌 <strong>Testing an API on your own computer?</strong> The cloud can&apos;t reach
                             <code className="bg-blue-500/20 px-1 rounded mx-1">localhost</code>
-                            directly — click <strong>Local APIs</strong> in the toolbar to connect one, no signup needed.
+                            directly. Click <strong>Local APIs</strong> in the toolbar to connect one, no signup needed.
                         </p>
                     </div>
                 </div>
@@ -153,7 +153,7 @@ export default function OnboardingGuide({ open, onClose }: OnboardingGuideProps)
                         <ul className="space-y-2 text-sm text-green-300/80">
                             <li className="flex items-start gap-2">
                                 <Sparkles className="w-4 h-4 mt-0.5 shrink-0" />
-                                <span>Click <strong>Templates</strong> in the toolbar for ready-made workflows — GET endpoints, validation, branching, and stateful mocks</span>
+                                <span>Click <strong>Templates</strong> in the toolbar for ready-made workflows: GET endpoints, validation, branching, and stateful mocks</span>
                             </li>
                             <li className="flex items-start gap-2">
                                 <Terminal className="w-4 h-4 mt-0.5 shrink-0" />

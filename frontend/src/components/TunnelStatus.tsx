@@ -34,7 +34,7 @@ export default function TunnelStatus() {
     const checkStatus = async () => {
         try {
             // The tunnel agent runs a local-only control server on the user's
-            // own machine (see tunnel-agent/control-server.js) — never a MockFlow server.
+            // own machine (see tunnel-agent/control-server.js), never a MockFlow server.
             const response = await fetch(`${CONTROL_SERVER_URL}/status`, { signal: AbortSignal.timeout(2000) });
             if (response.ok) {
                 const data = await response.json();

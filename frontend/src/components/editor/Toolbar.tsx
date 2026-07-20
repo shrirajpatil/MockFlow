@@ -63,7 +63,7 @@ export default function Toolbar() {
     const [deploying, setDeploying] = useState(false);
     const [copied, setCopied] = useState(false);
 
-    // Workspace ID is generated locally on first visit — never user-typed, so two
+    // Workspace ID is generated locally on first visit, never user-typed, so two
     // people can never collide into the same workspace by picking the same name.
     useEffect(() => {
         setWorkspace(getOrCreateWorkspace());
@@ -244,7 +244,7 @@ export default function Toolbar() {
             } catch { /* keep raw */ }
             setTryItResult(`HTTP ${response.status}\n\n${pretty}`);
         } catch (error: any) {
-            setTryItResult(`Request failed: ${error.message}\n\nNote: deployed endpoints are served by Netlify Functions — run "netlify dev" locally or use your deployed site URL.`);
+            setTryItResult(`Request failed: ${error.message}\n\nNote: deployed endpoints are served by Netlify Functions. Run "netlify dev" locally or use your deployed site URL.`);
         } finally {
             setTryingIt(false);
         }
@@ -558,7 +558,7 @@ export default function Toolbar() {
                 deployDone={isDeployed}
             />
 
-            {/* Workspace Dialog — informational + recovery, never a place to type a new name */}
+            {/* Workspace Dialog: informational + recovery, never a place to type a new name */}
             <Dialog
                 open={workspaceDialogOpen}
                 onOpenChange={(open) => {
@@ -574,7 +574,7 @@ export default function Toolbar() {
                     <DialogHeader>
                         <DialogTitle className="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">Your workspace</DialogTitle>
                         <DialogDescription>
-                            Namespaces your workflows and API URLs. Generated automatically for this browser — nobody else can guess it.
+                            Namespaces your workflows and API URLs. Generated automatically for this browser, so nobody else can guess it.
                         </DialogDescription>
                     </DialogHeader>
 
@@ -603,7 +603,7 @@ export default function Toolbar() {
 
                             <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3">
                                 <p className="text-xs text-amber-300">
-                                    <span className="font-bold">Keep this private.</span> Anyone with this ID can see and edit everything in this workspace — treat it like a password, not a username.
+                                    <span className="font-bold">Keep this private.</span> Anyone with this ID can see and edit everything in this workspace. Treat it like a password, not a username.
                                 </p>
                             </div>
 
@@ -733,10 +733,10 @@ export default function Toolbar() {
                         </Button>
 
                         {testResult && (
-                            <div className="space-y-2">
+                            <div className="space-y-2 min-w-0">
                                 <Label>Result</Label>
-                                <ScrollArea className="h-[300px] border border-indigo-500/20 rounded-md p-4">
-                                    <div className="space-y-2">
+                                <ScrollArea className="h-[300px] w-full border border-indigo-500/20 rounded-md p-4">
+                                    <div className="space-y-2 min-w-0">
                                         <div className="flex items-center gap-2">
                                             <span className="font-semibold">Status:</span>
                                             <span className={testResult.success ? 'text-emerald-400' : 'text-red-400'}>
@@ -752,27 +752,27 @@ export default function Toolbar() {
                                         )}
 
                                         {testResult.body && (
-                                            <div className="space-y-1">
+                                            <div className="space-y-1 min-w-0">
                                                 <span className="font-semibold">Response Body:</span>
-                                                <pre className="bg-black/20 p-2 rounded text-xs overflow-auto">
+                                                <pre className="bg-black/20 p-2 rounded text-xs whitespace-pre-wrap break-words min-w-0">
                                                     {JSON.stringify(testResult.body, null, 2)}
                                                 </pre>
                                             </div>
                                         )}
 
                                         {testResult.error && (
-                                            <div className="space-y-1">
+                                            <div className="space-y-1 min-w-0">
                                                 <span className="font-semibold text-red-400">Error:</span>
-                                                <pre className="bg-red-500/10 p-2 rounded text-xs text-red-300">
+                                                <pre className="bg-red-500/10 p-2 rounded text-xs text-red-300 whitespace-pre-wrap break-words min-w-0">
                                                     {testResult.error}
                                                 </pre>
                                             </div>
                                         )}
 
                                         {testResult.logs && testResult.logs.length > 0 && (
-                                            <div className="space-y-1">
+                                            <div className="space-y-1 min-w-0">
                                                 <span className="font-semibold">Execution Logs:</span>
-                                                <pre className="bg-black/20 p-2 rounded text-xs overflow-auto">
+                                                <pre className="bg-black/20 p-2 rounded text-xs whitespace-pre-wrap break-words min-w-0">
                                                     {testResult.logs.join('\n')}
                                                 </pre>
                                             </div>
@@ -842,7 +842,7 @@ export default function Toolbar() {
                     <DialogHeader>
                         <DialogTitle>Start from a template</DialogTitle>
                         <DialogDescription>
-                            Ready-made workflows — load one, Test it, then Save and Deploy.
+                            Ready-made workflows: load one, Test it, then Save and Deploy.
                         </DialogDescription>
                     </DialogHeader>
 
@@ -904,7 +904,7 @@ export default function Toolbar() {
 }
 
 /**
- * Slim, non-modal guidance that stays visible until the first deploy — unlike
+ * Slim, non-modal guidance that stays visible until the first deploy. Unlike
  * OnboardingGuide (a one-time popup), this keeps tracking Build/Test/Save/Deploy
  * across the whole session so the "how do I use this" answer doesn't disappear
  * after the first dismiss.

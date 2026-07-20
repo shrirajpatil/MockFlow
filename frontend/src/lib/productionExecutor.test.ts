@@ -60,4 +60,47 @@ describe('WorkflowExecutor (editor Test button)', () => {
         expect((await run(nodes, edges, { age: 30 })).statusCode).toBe(200);
         expect((await run(nodes, edges, { age: 10 })).statusCode).toBe(403);
     });
+
+    it('resolves {{fake.*}} tokens, tolerating both quoted and bare authoring styles', async () => {
+        const nodes: Node[] = [
+            { id: 'r1', type: 'request', position: { x: 0, y: 0 }, data: { type: 'request', method: 'POST', path: '/x' } },
+            {
+                id: 'resp1',
+                type: 'response',
+                position: { x: 0, y: 0 },
+                data: {
+                    type: 'response',
+                    statusCode: 200,
+                    bodyTemplate: '{"id": "{{fake.uuid}}", "n": {{fake.number}}}',
+                },
+            },
+        ];
+        const edges: Edge[] = [{ id: 'e1', source: 'r1', target: 'resp1' }];
+
+        const result = await run(nodes, edges);
+        expect(result.success).toBe(true);
+        expect(result.body.id).toMatch(/^[0-9a-f-]{36}$/);
+        expect(typeof result.body.n).toBe('number');
+    });
+
+    it('chaos mode replaces the response with a simulated error at a 100% error rate', async () => {
+        const nodes: Node[] = [
+            { id: 'r1', type: 'request', position: { x: 0, y: 0 }, data: { type: 'request', method: 'GET', path: '/x' } },
+            {
+                id: 'resp1',
+                type: 'response',
+                position: { x: 0, y: 0 },
+                data: {
+                    type: 'response',
+                    statusCode: 200,
+                    bodyTemplate: '{"ok": true}',
+                    chaos: { enabled: true, errorRate: 100, errorStatusCodes: [503] },
+                },
+            },
+        ];
+        const edges: Edge[] = [{ id: 'e1', source: 'r1', target: 'resp1' }];
+
+        const result = await run(nodes, edges);
+        expect(result.statusCode).toBe(503);
+    });
 });
