@@ -36,32 +36,32 @@ const NodeConfigPanel = () => {
 
     if (!selectedNode || !nodeData) {
         return (
-            <div className="w-80 bg-zinc-900/80 backdrop-blur-2xl border-l border-white/[0.08] flex flex-col items-center justify-center p-8 text-center">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500/20 to-indigo-500/20 border border-violet-500/30 flex items-center justify-center mb-5">
+            <div className="w-80 bg-[#111114]/95 backdrop-blur-2xl border-l border-white/[0.08] flex flex-col items-center justify-center p-8 text-center">
+                <div className="w-16 h-16 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center mb-5">
                     <Settings2 className="w-7 h-7 text-violet-400" />
                 </div>
                 <h3 className="font-semibold text-white mb-2">No Selection</h3>
-                <p className="text-sm text-zinc-500">Click a node to configure</p>
+                <p className="text-sm text-white/35">Click a node to configure</p>
             </div>
         );
     }
 
     return (
-        <div className="w-80 bg-zinc-900/80 backdrop-blur-2xl border-l border-white/[0.08] flex flex-col">
+        <div className="w-80 bg-[#111114]/95 backdrop-blur-2xl border-l border-white/[0.08] flex flex-col">
             {/* Header */}
             <div className="px-5 py-4 border-b border-white/[0.08] flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-violet-400" />
                     <div>
                         <h2 className="font-semibold text-sm text-white">Configure</h2>
-                        <p className="text-xs text-zinc-500 capitalize">{nodeData.type} Node</p>
+                        <p className="text-xs text-white/35 capitalize">{nodeData.type} Node</p>
                     </div>
                 </div>
                 <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => setNodes(nodes.filter((n) => n.id !== selectedNode.id))}
-                    className="h-8 w-8 text-zinc-400 hover:text-red-400 hover:bg-red-500/10"
+                    className="h-8 w-8 text-white/40 hover:text-red-400 hover:bg-red-500/10"
                 >
                     <Trash2 className="w-4 h-4" />
                 </Button>
@@ -93,9 +93,9 @@ const NodeConfigPanel = () => {
     );
 };
 
-const inputStyles = "h-10 text-sm bg-zinc-800/50 border-zinc-700/50 text-white placeholder-zinc-500 focus:border-violet-500/50 focus:ring-violet-500/20 rounded-lg";
-const textareaStyles = "bg-zinc-800/50 border-zinc-700/50 text-white placeholder-zinc-500 focus:border-violet-500/50 focus:ring-violet-500/20 font-mono text-xs rounded-lg";
-const labelStyles = "text-xs text-zinc-400 font-medium";
+const inputStyles = "h-10 text-sm bg-white/[0.04] border-white/10 text-white placeholder-white/30 focus:border-violet-500/50 focus:ring-violet-500/20 rounded-lg";
+const textareaStyles = "bg-white/[0.04] border-white/10 text-white placeholder-white/30 focus:border-violet-500/50 focus:ring-violet-500/20 font-mono text-xs rounded-lg";
+const labelStyles = "text-xs text-white/40 font-medium";
 
 const RequestConfig = ({ data, updateData }: any) => {
     const method = data.method || 'GET';
@@ -106,19 +106,19 @@ const RequestConfig = ({ data, updateData }: any) => {
             <div className="space-y-2">
                 <div className="flex items-center justify-between">
                     <Label className={labelStyles}>Method</Label>
-                    <span className="text-[10px] text-zinc-500">HTTP verb</span>
+                    <span className="text-[10px] text-white/35">HTTP verb</span>
                 </div>
                 <Select value={method} onValueChange={(v) => updateData({ method: v })}>
                     <SelectTrigger className={inputStyles}><SelectValue /></SelectTrigger>
-                    <SelectContent className="bg-zinc-800 border-zinc-700">
-                        {['GET', 'POST', 'PUT', 'PATCH', 'DELETE'].map(m => <SelectItem key={m} value={m} className="text-white hover:bg-zinc-700">{m}</SelectItem>)}
+                    <SelectContent className="bg-[#17171b] border-white/10">
+                        {['GET', 'POST', 'PUT', 'PATCH', 'DELETE'].map(m => <SelectItem key={m} value={m} className="text-white hover:bg-white/5">{m}</SelectItem>)}
                     </SelectContent>
                 </Select>
             </div>
             <div className="space-y-2">
                 <div className="flex items-center justify-between">
                     <Label className={labelStyles}>URL / Path</Label>
-                    <span className="text-[10px] text-zinc-500">Full URL or /path</span>
+                    <span className="text-[10px] text-white/35">Full URL or /path</span>
                 </div>
                 <Input
                     value={data.path || ''}
@@ -129,9 +129,9 @@ const RequestConfig = ({ data, updateData }: any) => {
                 {isLocalhost ? (
                     <LocalhostHint />
                 ) : (
-                    <div className="bg-indigo-500/20 border border-indigo-400/30 rounded-lg p-3">
-                        <p className="text-xs text-indigo-200">
-                            <span className="font-bold text-indigo-300">TIP:</span> Enter full URL like <code className="bg-indigo-500/30 px-1 rounded">https://api.example.com/users</code> to call real APIs
+                    <div className="bg-violet-500/10 border border-violet-500/20 rounded-lg p-3">
+                        <p className="text-xs text-violet-200">
+                            <span className="font-bold text-violet-300">TIP:</span> Enter full URL like <code className="bg-black/20 px-1 rounded">https://api.example.com/users</code> to call real APIs
                         </p>
                     </div>
                 )}
@@ -140,7 +140,7 @@ const RequestConfig = ({ data, updateData }: any) => {
                 <div className="space-y-2">
                     <div className="flex items-center justify-between">
                         <Label className={labelStyles}>Body Schema</Label>
-                        <span className="text-[10px] text-zinc-500">JSON format</span>
+                        <span className="text-[10px] text-white/35">JSON format</span>
                     </div>
                     <Textarea
                         value={data.bodySchema || ''}
@@ -163,7 +163,7 @@ const RequestConfig = ({ data, updateData }: any) => {
  */
 const LocalhostHint = () => {
     return (
-        <div className="bg-amber-500/10 border border-amber-400/30 rounded-lg p-3 space-y-1.5">
+        <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 space-y-1.5">
             <p className="text-xs text-amber-200">
                 <span className="font-bold text-amber-300">Heads up:</span> this URL points at your own computer, and MockFlow&apos;s
                 cloud can&apos;t reach it directly.
@@ -199,39 +199,39 @@ const ValidationConfig = ({ data, updateData }: any) => {
                     <Plus className="w-3 h-3 mr-1" /> Add
                 </Button>
             </div>
-            <p className="text-xs text-zinc-500">
+            <p className="text-xs text-white/35">
                 Checked in order against the request body. The first failing rule returns a 400 with its error message.
             </p>
             {rules.length === 0 && (
-                <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-4 text-center">
-                    <p className="text-xs text-zinc-500">No rules yet. Add one to validate data.</p>
+                <div className="bg-white/[0.03] border border-white/10 rounded-lg p-4 text-center">
+                    <p className="text-xs text-white/35">No rules yet. Add one to validate data.</p>
                 </div>
             )}
             {rules.map((rule: any, idx: number) => (
-                <div key={idx} className="bg-zinc-800/50 border border-zinc-700/50 rounded-xl p-4 space-y-3">
+                <div key={idx} className="bg-white/[0.03] border border-white/10 rounded-xl p-4 space-y-3">
                     <div className="flex justify-between items-center">
                         <span className="text-xs font-medium text-violet-400">Rule {idx + 1}</span>
-                        <Button variant="ghost" size="icon" onClick={() => removeRule(idx)} className="h-6 w-6 text-zinc-500 hover:text-red-400 hover:bg-red-500/10">
+                        <Button variant="ghost" size="icon" onClick={() => removeRule(idx)} className="h-6 w-6 text-white/35 hover:text-red-400 hover:bg-red-500/10">
                             <Trash2 className="w-3 h-3" />
                         </Button>
                     </div>
                     <div className="space-y-1">
-                        <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Field name in request body</span>
+                        <span className="text-[10px] text-white/35 uppercase tracking-wide">Field name in request body</span>
                         <Input value={rule.field} onChange={(e) => updateRule(idx, { field: e.target.value })} placeholder="e.g. email" className={inputStyles} />
                     </div>
                     <div className="space-y-1">
-                        <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Condition</span>
+                        <span className="text-[10px] text-white/35 uppercase tracking-wide">Condition</span>
                         <Select value={rule.condition} onValueChange={(v) => updateRule(idx, { condition: v })}>
                             <SelectTrigger className={inputStyles}><SelectValue /></SelectTrigger>
-                            <SelectContent className="bg-zinc-800 border-zinc-700">
-                                {['required', 'type', 'regex', 'min', 'max'].map(c => <SelectItem key={c} value={c} className="text-white hover:bg-zinc-700">{c}</SelectItem>)}
+                            <SelectContent className="bg-[#17171b] border-white/10">
+                                {['required', 'type', 'regex', 'min', 'max'].map(c => <SelectItem key={c} value={c} className="text-white hover:bg-white/5">{c}</SelectItem>)}
                             </SelectContent>
                         </Select>
-                        <p className="text-[11px] text-zinc-500">{CONDITION_HELP[rule.condition] || ''}</p>
+                        <p className="text-[11px] text-white/35">{CONDITION_HELP[rule.condition] || ''}</p>
                     </div>
                     {needsValue(rule.condition) && (
                         <div className="space-y-1">
-                            <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Value</span>
+                            <span className="text-[10px] text-white/35 uppercase tracking-wide">Value</span>
                             <Input
                                 value={rule.value || ''}
                                 onChange={(e) => updateRule(idx, { value: e.target.value })}
@@ -241,7 +241,7 @@ const ValidationConfig = ({ data, updateData }: any) => {
                         </div>
                     )}
                     <div className="space-y-1">
-                        <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Error message (optional)</span>
+                        <span className="text-[10px] text-white/35 uppercase tracking-wide">Error message (optional)</span>
                         <Input
                             value={rule.errorMessage || ''}
                             onChange={(e) => updateRule(idx, { errorMessage: e.target.value })}
@@ -276,24 +276,24 @@ const TransformationConfig = ({ data, updateData }: any) => {
                 </p>
             </div>
             {transformations.length === 0 && (
-                <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-4 text-center">
-                    <p className="text-xs text-zinc-500">No transformations. Add one to modify data.</p>
+                <div className="bg-white/[0.03] border border-white/10 rounded-lg p-4 text-center">
+                    <p className="text-xs text-white/35">No transformations. Add one to modify data.</p>
                 </div>
             )}
             {transformations.map((t: any, idx: number) => (
-                <div key={idx} className="bg-zinc-800/50 border border-zinc-700/50 rounded-xl p-4 space-y-3">
+                <div key={idx} className="bg-white/[0.03] border border-white/10 rounded-xl p-4 space-y-3">
                     <div className="flex justify-between items-center">
                         <span className="text-xs font-medium text-orange-400">Transform {idx + 1}</span>
-                        <Button variant="ghost" size="icon" onClick={() => removeTransform(idx)} className="h-6 w-6 text-zinc-500 hover:text-red-400 hover:bg-red-500/10">
+                        <Button variant="ghost" size="icon" onClick={() => removeTransform(idx)} className="h-6 w-6 text-white/35 hover:text-red-400 hover:bg-red-500/10">
                             <Trash2 className="w-3 h-3" />
                         </Button>
                     </div>
                     <div className="space-y-1">
-                        <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Source: where the value comes from</span>
+                        <span className="text-[10px] text-white/35 uppercase tracking-wide">Source: where the value comes from</span>
                         <Input value={t.source} onChange={(e) => updateTransform(idx, { source: e.target.value })} placeholder="request.body.name" className={`${inputStyles} font-mono`} />
                     </div>
                     <div className="space-y-1">
-                        <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Target: the name to store it under</span>
+                        <span className="text-[10px] text-white/35 uppercase tracking-wide">Target: the name to store it under</span>
                         <Input value={t.target} onChange={(e) => updateTransform(idx, { target: e.target.value })} placeholder="user.name" className={`${inputStyles} font-mono`} />
                     </div>
                 </div>
@@ -331,7 +331,7 @@ const ResponseConfig = ({ data, updateData }: any) => {
             <div className="space-y-2">
                 <div className="flex items-center justify-between">
                     <Label className={labelStyles}>Fake data tokens</Label>
-                    <span className="text-[10px] text-zinc-500">Click to copy</span>
+                    <span className="text-[10px] text-white/35">Click to copy</span>
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                     {FAKE_TOKENS.map((token) => (
@@ -353,12 +353,12 @@ const ResponseConfig = ({ data, updateData }: any) => {
                         role="switch"
                         aria-checked={!!chaos.enabled}
                         onClick={() => updateChaos({ enabled: !chaos.enabled })}
-                        className={`relative w-9 h-5 rounded-full transition-colors shrink-0 ${chaos.enabled ? 'bg-fuchsia-500' : 'bg-zinc-700'}`}
+                        className={`relative w-9 h-5 rounded-full transition-colors shrink-0 ${chaos.enabled ? 'bg-fuchsia-500' : 'bg-white/10'}`}
                     >
                         <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${chaos.enabled ? 'translate-x-4' : ''}`} />
                     </button>
                 </div>
-                <p className="text-[11px] text-zinc-500">
+                <p className="text-[11px] text-white/35">
                     Randomly slow down or fail this response, to test how your frontend handles a flaky real-world API.
                 </p>
 
@@ -366,7 +366,7 @@ const ResponseConfig = ({ data, updateData }: any) => {
                     <div className="bg-fuchsia-500/10 border border-fuchsia-500/20 rounded-xl p-4 space-y-3">
                         <div className="grid grid-cols-2 gap-3">
                             <div className="space-y-1">
-                                <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Latency min (ms)</span>
+                                <span className="text-[10px] text-white/35 uppercase tracking-wide">Latency min (ms)</span>
                                 <Input
                                     type="number"
                                     min={0}
@@ -377,7 +377,7 @@ const ResponseConfig = ({ data, updateData }: any) => {
                                 />
                             </div>
                             <div className="space-y-1">
-                                <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Latency max (ms)</span>
+                                <span className="text-[10px] text-white/35 uppercase tracking-wide">Latency max (ms)</span>
                                 <Input
                                     type="number"
                                     min={0}
@@ -389,7 +389,7 @@ const ResponseConfig = ({ data, updateData }: any) => {
                             </div>
                         </div>
                         <div className="space-y-1">
-                            <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Error rate (% of requests)</span>
+                            <span className="text-[10px] text-white/35 uppercase tracking-wide">Error rate (% of requests)</span>
                             <Input
                                 type="number"
                                 min={0}
@@ -400,7 +400,7 @@ const ResponseConfig = ({ data, updateData }: any) => {
                             />
                         </div>
                         <div className="space-y-1">
-                            <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Error status codes (comma-separated)</span>
+                            <span className="text-[10px] text-white/35 uppercase tracking-wide">Error status codes (comma-separated)</span>
                             <Input
                                 value={(chaos.errorStatusCodes || [500]).join(', ')}
                                 onChange={(e) => updateChaos({
@@ -439,7 +439,7 @@ const FakeTokenChip = ({ token }: { token: string }) => {
             type="button"
             onClick={copy}
             title={`Copy ${value}`}
-            className="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-1 rounded-md bg-zinc-800/70 border border-zinc-700/60 text-zinc-300 hover:border-violet-500/50 hover:text-white transition-colors"
+            className="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-1 rounded-md bg-white/[0.04] border-white/10 text-white/60 hover:border-violet-500/50 hover:text-white transition-colors"
         >
             {copied ? <Check className="w-2.5 h-2.5 text-emerald-400" /> : <Copy className="w-2.5 h-2.5" />}
             fake.{token}
@@ -461,11 +461,11 @@ const StateConfig = ({ data, updateData }: any) => {
                 <Label className={labelStyles}>Operation</Label>
                 <Select value={operation} onValueChange={(v) => updateData({ operation: v })}>
                     <SelectTrigger className={inputStyles}><SelectValue /></SelectTrigger>
-                    <SelectContent className="bg-zinc-800 border-zinc-700">
-                        {['get', 'set'].map(o => <SelectItem key={o} value={o} className="text-white hover:bg-zinc-700">{o}</SelectItem>)}
+                    <SelectContent className="bg-[#17171b] border-white/10">
+                        {['get', 'set'].map(o => <SelectItem key={o} value={o} className="text-white hover:bg-white/5">{o}</SelectItem>)}
                     </SelectContent>
                 </Select>
-                <p className="text-[11px] text-zinc-500">
+                <p className="text-[11px] text-white/35">
                     {operation === 'get'
                         ? 'Loads the value under Key into variables.<key> for later nodes to use'
                         : 'Saves Value under Key, replacing whatever was there before'}
@@ -474,13 +474,13 @@ const StateConfig = ({ data, updateData }: any) => {
             <div className="space-y-2">
                 <Label className={labelStyles}>Key</Label>
                 <Input value={data.key || ''} onChange={(e) => updateData({ key: e.target.value })} placeholder="profile" className={`${inputStyles} font-mono`} />
-                <p className="text-[11px] text-zinc-500">A short name for this piece of data, e.g. &quot;profile&quot; or &quot;counter&quot;.</p>
+                <p className="text-[11px] text-white/35">A short name for this piece of data, e.g. &quot;profile&quot; or &quot;counter&quot;.</p>
             </div>
             {operation === 'set' && (
                 <div className="space-y-2">
                     <Label className={labelStyles}>Value</Label>
                     <Input value={data.value || ''} onChange={(e) => updateData({ value: e.target.value })} placeholder="{{request.body}}" className={`${inputStyles} font-mono`} />
-                    <p className="text-[11px] text-zinc-500">
+                    <p className="text-[11px] text-white/35">
                         Supports <code className="bg-black/20 px-1 rounded">{'{{'}path{'}}'}</code> templating, e.g.{' '}
                         <code className="bg-black/20 px-1 rounded">{'{{'}request.body{'}}'}</code> to store the whole request body.
                     </p>
@@ -520,8 +520,8 @@ const ConditionalConfig = ({ data, updateData }: any) => (
                 <Input value={data.falseLabel || 'No'} onChange={(e) => updateData({ falseLabel: e.target.value })} className={inputStyles} />
             </div>
         </div>
-        <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-2.5">
-            <p className="text-[11px] text-zinc-400">
+        <div className="bg-white/[0.03] border border-white/10 rounded-lg p-2.5">
+            <p className="text-[11px] text-white/45">
                 Connect this node&apos;s two outgoing handles to different next steps. The bottom-left handle fires on{' '}
                 <span className="text-emerald-400">true</span>, bottom-right on <span className="text-red-400">false</span>.
             </p>

@@ -41,8 +41,11 @@ const CORS_HEADERS = {
 function isOriginAllowed(origin: string | undefined): boolean {
     if (!origin) return false;
 
-    // In development, allow all localhost origins
-    if (process.env.NODE_ENV === 'development') {
+    // In development, allow all localhost origins. `netlify dev` doesn't set
+    // NODE_ENV=development itself, so also check NETLIFY_DEV (which it does
+    // set) — otherwise this branch silently never fires under `netlify dev`.
+    const isLocalDev = process.env.NETLIFY_DEV === 'true' || process.env.NODE_ENV === 'development';
+    if (isLocalDev) {
         return origin.includes('localhost') || origin.includes('127.0.0.1');
     }
 
@@ -226,8 +229,12 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
             }
         }
 
-        // 3. Local and private URLs cannot be reached from deployed infrastructure
-        if (isLocalURL(config.url) || isPrivateAddress(config.url)) {
+        // 3. Local and private URLs cannot be reached from deployed infrastructure.
+        // When this function runs locally (netlify dev), it's on the same
+        // machine as the target, so localhost really is reachable here and
+        // this guard would only block a legitimate local workflow.
+        const isLocalDev = process.env.NETLIFY_DEV === 'true' || process.env.NODE_ENV === 'development';
+        if (!isLocalDev && (isLocalURL(config.url) || isPrivateAddress(config.url))) {
             return {
                 statusCode: 400,
                 headers: {
@@ -236,7 +243,7 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
                 },
                 body: JSON.stringify({
                     error: 'Cannot reach local/private addresses',
-                    message: 'This proxy runs in the cloud and cannot reach your machine. To test a local API, expose it with the tunnel-agent CLI (npm start in tunnel-agent/) and use the public ngrok URL in your Request node.',
+                    message: 'This proxy runs in the cloud and cannot reach your machine. To test a local API, click Local APIs in the toolbar to connect one with a no-signup SSH tunnel.',
                 }),
             };
         }

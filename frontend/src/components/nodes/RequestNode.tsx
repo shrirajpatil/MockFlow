@@ -18,10 +18,10 @@ const RequestNode = ({ data, selected }: NodeProps<RequestNodeData>) => {
                     <span className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 font-bold text-[10px] border border-blue-500/20">
                         {data.method || 'GET'}
                     </span>
-                    <span className="text-slate-400 font-mono text-[10px] truncate">{data.path || '/api/endpoint'}</span>
+                    <span className="text-white/45 font-mono text-[10px] truncate">{data.path || '/api/endpoint'}</span>
                 </div>
                 {data.pathParams && data.pathParams.length > 0 && (
-                    <div className="text-slate-500 text-[10px]">
+                    <div className="text-white/35 text-[10px]">
                         Path Params: {data.pathParams.length}
                     </div>
                 )}

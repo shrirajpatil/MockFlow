@@ -381,31 +381,31 @@ export default function Toolbar() {
 
     return (
         <>
-            <div className="h-14 flex items-center justify-between px-6 bg-zinc-900/95 backdrop-blur-xl border-b border-white/[0.08] z-50 relative sticky top-0">
+            <div className="h-14 flex items-center justify-between px-6 bg-[#0b0b0d]/95 backdrop-blur-xl hairline-b border-b z-50 relative sticky top-0">
                 <div className="flex items-center gap-5">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 via-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/25">
-                            <Zap className="w-5 h-5 text-white" />
+                        <div className="w-8 h-8 rounded-lg bg-violet-500 flex items-center justify-center">
+                            <Zap className="w-4 h-4 text-[#0b0b0d]" />
                         </div>
                         <div>
-                            <h1 className="font-bold text-base text-white tracking-tight leading-none">
-                                MockFlow <span className="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">Studio</span>
+                            <h1 className="font-semibold text-[15px] text-white tracking-tight leading-none">
+                                MockFlow <span className="text-white/40 font-normal">Studio</span>
                             </h1>
-                            <span className="text-[10px] text-zinc-500 font-medium uppercase tracking-wide block mt-0.5">
+                            <span className="text-[10px] text-white/30 font-medium uppercase tracking-wide block mt-0.5">
                                 Visual Builder
                             </span>
                         </div>
                     </div>
 
                     <div className="hidden md:flex items-center gap-2 text-xs">
-                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-800/60 border border-zinc-700/50 text-zinc-300">
+                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full surface-raised text-white/60">
                             <span className="flex items-center gap-1.5">
-                                <span className={`w-1.5 h-1.5 rounded-full ${nodeCount > 0 ? 'bg-indigo-400' : 'bg-zinc-600'}`}></span>
+                                <span className={`w-1.5 h-1.5 rounded-full ${nodeCount > 0 ? 'bg-violet-400' : 'bg-white/20'}`}></span>
                                 {nodeCount} Nodes
                             </span>
-                            <span className="w-px h-3 bg-zinc-700"></span>
+                            <span className="w-px h-3 bg-white/10"></span>
                             <span className="flex items-center gap-1.5">
-                                <span className={`w-1.5 h-1.5 rounded-full ${edgeCount > 0 ? 'bg-violet-400' : 'bg-zinc-600'}`}></span>
+                                <span className={`w-1.5 h-1.5 rounded-full ${edgeCount > 0 ? 'bg-violet-400' : 'bg-white/20'}`}></span>
                                 {edgeCount} Edges
                             </span>
                         </div>
@@ -413,7 +413,7 @@ export default function Toolbar() {
                         {workspace && (
                             <button
                                 onClick={() => setWorkspaceDialogOpen(true)}
-                                className="px-3 py-1.5 rounded-full bg-violet-500/20 text-violet-300 border border-violet-500/30 flex items-center gap-2 hover:bg-violet-500/30 transition-colors font-mono"
+                                className="px-3 py-1.5 rounded-full bg-violet-500/10 text-violet-300 border border-violet-500/20 flex items-center gap-2 hover:bg-violet-500/15 transition-colors font-mono"
                                 title="View or restore your workspace"
                             >
                                 <Database className="w-3 h-3" /> {shortLabel(workspace)}
@@ -481,8 +481,8 @@ export default function Toolbar() {
                                     onClick={handleDeploy}
                                     disabled={!workflowId || deploying}
                                     className={isDeployed
-                                        ? "bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white border-0"
-                                        : "bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white border-0"
+                                        ? "bg-emerald-500 hover:bg-emerald-400 text-[#0b0b0d] border-0"
+                                        : "bg-violet-500 hover:bg-violet-400 text-[#0b0b0d] border-0"
                                     }
                                 >
                                     {isDeployed ? <CheckCircle2 className="w-4 h-4 mr-2" /> : <Rocket className="w-4 h-4 mr-2" />}
@@ -518,7 +518,7 @@ export default function Toolbar() {
 
                         <Tooltip>
                             <TooltipTrigger asChild>
-                                <Button className="bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-600 text-white border-0" size="sm" onClick={() => setTestDialogOpen(true)}>
+                                <Button variant="outline" className="border-violet-500/30 text-violet-300 hover:bg-violet-500/10 hover:text-violet-200" size="sm" onClick={() => setTestDialogOpen(true)}>
                                     <Play className="w-4 h-4 mr-2" />
                                     Test
                                 </Button>
@@ -572,7 +572,7 @@ export default function Toolbar() {
             >
                 <DialogContent className="border-indigo-500/20">
                     <DialogHeader>
-                        <DialogTitle className="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">Your workspace</DialogTitle>
+                        <DialogTitle className="text-white">Your workspace</DialogTitle>
                         <DialogDescription>
                             Namespaces your workflows and API URLs. Generated automatically for this browser, so nobody else can guess it.
                         </DialogDescription>
@@ -643,7 +643,7 @@ export default function Toolbar() {
                                     Cancel
                                 </Button>
                                 <Button
-                                    className="flex-1 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700"
+                                    className="flex-1 bg-violet-500 hover:bg-violet-400 text-[#0b0b0d] border-0"
                                     onClick={() => {
                                         const result = restoreWorkspace(restoreCode);
                                         if (!result.ok) {
@@ -699,7 +699,7 @@ export default function Toolbar() {
                         <Button
                             onClick={handleSaveToDatabase}
                             disabled={!workflowName.trim() || saving}
-                            className="w-full bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700"
+                            className="w-full bg-violet-500 hover:bg-violet-400 text-[#0b0b0d] border-0"
                         >
                             {saving ? 'Saving...' : 'Save Workflow'}
                         </Button>
@@ -728,7 +728,7 @@ export default function Toolbar() {
                             />
                         </div>
 
-                        <Button onClick={handleTest} disabled={testing} className="w-full bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-600">
+                        <Button onClick={handleTest} disabled={testing} className="w-full bg-violet-500 hover:bg-violet-400 text-[#0b0b0d] border-0">
                             {testing ? 'Testing...' : 'Run Test'}
                         </Button>
 
@@ -823,7 +823,7 @@ export default function Toolbar() {
                             </pre>
                         </div>
 
-                        <Button onClick={handleTryIt} disabled={tryingIt} className="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700">
+                        <Button onClick={handleTryIt} disabled={tryingIt} className="w-full bg-emerald-500 hover:bg-emerald-400 text-[#0b0b0d] border-0">
                             {tryingIt ? 'Calling endpoint...' : 'Try it now'}
                         </Button>
 

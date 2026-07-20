@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { evaluateCondition } from './lib/safeEval.js';
 import { generateFake } from './lib/fakeData.js';
 
@@ -102,7 +103,8 @@ export class ServerWorkflowExecutor {
 
         switch (type) {
             case 'request':
-                break; // entry point; matching already done by the router
+                await this.runRequest(data);
+                break;
             case 'validation':
                 this.runValidation(data);
                 break;
@@ -128,6 +130,61 @@ export class ServerWorkflowExecutor {
 
         const nextNode = this.nodes.find((n) => n.id === nextEdge.target);
         return nextNode ? this.executeNode(nextNode) : null;
+    }
+
+    /**
+     * The Request node is normally just the entry point (routing already
+     * matched it before execution starts) — but if its URL/Path field holds
+     * an absolute http(s) URL, that means "call this real API", mirroring
+     * the editor's Test executor (frontend/src/lib/productionExecutor.ts)
+     * so a deployed workflow behaves the same way it did when tested.
+     */
+    private async runRequest(data: any): Promise<void> {
+        const path: string = data.path || '';
+        if (!/^https?:\/\//i.test(path)) return;
+
+        if (isPrivateAddress(path)) {
+            throw validationError('Request node URL points at a private/internal address, which is not allowed from a deployed workflow');
+        }
+
+        this.log(`Making HTTP request: ${data.method || 'GET'} ${path}`);
+
+        const headers: Record<string, string> = {};
+        for (const h of data.headers || []) {
+            if (h.key) headers[h.key] = h.value;
+        }
+        if (data.auth) {
+            switch (data.auth.type) {
+                case 'bearer':
+                    if (data.auth.token) headers['Authorization'] = `Bearer ${data.auth.token}`;
+                    break;
+                case 'apiKey':
+                    if (data.auth.apiKey && data.auth.apiKeyHeader) headers[data.auth.apiKeyHeader] = data.auth.apiKey;
+                    break;
+                case 'basic':
+                    if (data.auth.username && data.auth.password) {
+                        const credentials = Buffer.from(`${data.auth.username}:${data.auth.password}`).toString('base64');
+                        headers['Authorization'] = `Basic ${credentials}`;
+                    }
+                    break;
+            }
+        }
+
+        try {
+            const response = await axios({
+                method: data.method || 'GET',
+                url: path,
+                headers,
+                data: this.context.request.body,
+                timeout: data.timeout || 30000,
+                validateStatus: () => true,
+            });
+            this.context.variables.response = response.data;
+            this.log(`External response: ${response.status}`);
+        } catch (error: any) {
+            this.log(`Request failed: ${error.message}`);
+            throw error;
+        }
     }
 
     private runValidation(data: any): void {
@@ -322,6 +379,30 @@ export class ServerWorkflowExecutor {
 
     private log(message: string): void {
         this.logs.push(`[${new Date().toISOString()}] ${message}`);
+    }
+}
+
+/**
+ * SSRF guard: reject URLs whose hostname is a literal private/reserved IP.
+ * Mirrors backend/netlify/functions/proxy.ts's guard of the same name.
+ */
+function isPrivateAddress(url: string): boolean {
+    try {
+        const { hostname } = new URL(url);
+        if (!/^\d{1,3}(\.\d{1,3}){3}$/.test(hostname)) return false;
+
+        const octets = hostname.split('.').map(Number);
+        const [a, b] = octets as [number, number, number, number];
+        return (
+            a === 10 ||
+            a === 127 ||
+            (a === 172 && b >= 16 && b <= 31) ||
+            (a === 192 && b === 168) ||
+            (a === 169 && b === 254) ||
+            a === 0
+        );
+    } catch {
+        return false;
     }
 }
 

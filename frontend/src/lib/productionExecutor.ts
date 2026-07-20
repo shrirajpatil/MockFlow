@@ -130,15 +130,20 @@ export class ProductionWorkflowExecutor {
     }
 
     private async executeRequestNode(data: any): Promise<Partial<ExecutionResult>> {
-        // Request node can make a real HTTP request if URL is provided
-        const url = data.url || data.baseUrl;
+        // The editor's single "URL / Path" field is dual-purpose: an absolute
+        // http(s) URL means "call this real API"; a relative path just defines
+        // this mock's own route. (data.url/data.baseUrl are legacy fields the
+        // node config UI never actually sets.)
+        const path: string = data.path || '';
+        const isAbsoluteUrl = /^https?:\/\//i.test(path);
+        const url = data.url || data.baseUrl || (isAbsoluteUrl ? path : '');
 
         if (url) {
-            this.log(`Making HTTP request: ${data.method || 'GET'} ${url}${data.path || ''}`);
+            this.log(`Making HTTP request: ${data.method || 'GET'} ${url}`);
 
             const config: HTTPRequestConfig = {
                 method: data.method || 'GET',
-                url: `${url}${data.path || ''}`,
+                url,
                 headers: this.arrayToObject(data.headers || []),
                 body: this.context.request.body,
                 auth: data.auth,

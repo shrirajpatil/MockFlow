@@ -71,7 +71,7 @@ export default function WorkspaceTunnelSettings() {
                 <Tooltip>
                     <TooltipTrigger asChild>
                         <DialogTrigger asChild>
-                            <Button variant="ghost" size="sm" className="gap-2 text-zinc-300 hover:bg-zinc-800 hover:text-white">
+                            <Button variant="ghost" size="sm" className="gap-2 text-white/60 hover:bg-white/5 hover:text-white">
                                 {status.active ? (
                                     <Wifi className="w-4 h-4 text-emerald-400" />
                                 ) : (
