@@ -2,8 +2,46 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Zap, Linkedin, Workflow, Shield, Rocket, Terminal, ChevronRight, Sparkles, Inbox, Shuffle, Database, GitBranch, Send } from 'lucide-react';
+import { ArrowRight, Workflow, Shield, Rocket, Terminal, ChevronRight, Sparkles, Inbox, Shuffle, Database, GitBranch, Send, Layers, MousePointerClick, PlugZap, Users } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
+import SiteHeader from '@/components/marketing/SiteHeader';
+import SiteFooter from '@/components/marketing/SiteFooter';
+
+const FAQ_ITEMS = [
+  {
+    q: 'Is MockFlow free to use?',
+    a: 'Yes. MockFlow is free to use — build workflows, test them in the editor, and deploy live mock endpoints without a credit card.',
+  },
+  {
+    q: 'Do I need to write any backend code?',
+    a: 'No. Every endpoint is assembled visually from nodes — request, validation, transformation, conditional, state, and response. There is no server code to write or deploy.',
+  },
+  {
+    q: 'Can a mock API remember state across requests?',
+    a: 'Yes. State nodes persist values across requests using Redis, so you can simulate things like a counter, a cart, or a login session in a mock endpoint.',
+  },
+  {
+    q: 'Can I mock an API that does not exist yet?',
+    a: 'That is the main use case. Frontend and QA teams use MockFlow to stand up a realistic endpoint — with validation and branching logic — before the real backend is built, so nobody has to wait.',
+  },
+  {
+    q: 'Can I test against an API running on my own machine?',
+    a: 'Yes. The bundled tunnel agent exposes a local API through ngrok so a cloud-deployed MockFlow workflow can call it during local development.',
+  },
+];
+
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: FAQ_ITEMS.map((item) => ({
+    '@type': 'Question',
+    name: item.q,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: item.a,
+    },
+  })),
+};
 
 // Interactive Dot Grid Component
 const InteractiveGrid = () => {
@@ -160,37 +198,7 @@ export default function LandingPage() {
       <InteractiveGrid />
 
       {/* Navigation */}
-      <header className="relative z-50 border-b border-indigo-500/10">
-        <nav className="flex items-center justify-between px-6 lg:px-12 h-16 max-w-7xl mx-auto">
-          <div className="flex items-center gap-8">
-            <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 via-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/25 group-hover:shadow-violet-500/40 transition-shadow">
-                <Zap className="w-4.5 h-4.5 text-white" />
-              </div>
-              <span className="font-semibold text-lg bg-gradient-to-r from-white to-indigo-100 bg-clip-text text-transparent">MockFlow</span>
-            </Link>
-            <div className="hidden md:flex items-center gap-6 text-sm text-indigo-300/60">
-              <Link href="/editor" className="hover:text-white transition-colors">Editor</Link>
-              <Link href="/workflows" className="hover:text-white transition-colors">Workflows</Link>
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link
-              href="https://www.linkedin.com/in/shriraj-patil-526072227/"
-              target="_blank"
-              className="hidden sm:flex items-center gap-1.5 text-sm text-indigo-300/60 hover:text-white transition-colors"
-            >
-              <Linkedin className="w-4 h-4" />
-              <span>Shriraj</span>
-            </Link>
-            <Link href="/editor">
-              <Button className="bg-white text-indigo-950 hover:bg-indigo-50 font-medium rounded-lg h-9 px-5 text-sm transition-all shadow-lg shadow-white/10 hover:shadow-white/20">
-                Get Started
-              </Button>
-            </Link>
-          </div>
-        </nav>
-      </header>
+      <SiteHeader />
 
       {/* Hero */}
       <main className="relative z-10 pt-24 pb-16 px-6">
@@ -347,7 +355,7 @@ export default function LandingPage() {
       </main>
 
       {/* Features */}
-      <section className="relative z-10 pt-10 pb-28 px-6 border-t border-indigo-500/10">
+      <section id="features" className="relative z-10 pt-10 pb-28 px-6 border-t border-indigo-500/10 scroll-mt-20">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl lg:text-4xl font-bold mb-4 bg-gradient-to-b from-white to-indigo-200 bg-clip-text text-transparent">
@@ -361,9 +369,12 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-3 gap-6">
             {[
               // Tailwind can't generate interpolated class names, so each card carries full class strings
-              { icon: Workflow, title: 'Visual Workflow', desc: 'Build complex API logic with an intuitive drag-and-drop interface.', box: 'from-violet-500/20 to-violet-600/10 border-violet-500/30', text: 'text-violet-400' },
-              { icon: Shield, title: 'Built-in Validation', desc: 'Add request validation, authentication, and error handling nodes.', box: 'from-blue-500/20 to-blue-600/10 border-blue-500/30', text: 'text-blue-400' },
-              { icon: Rocket, title: 'One-Click Deploy', desc: 'Deploy your mock API instantly with a unique endpoint URL.', box: 'from-emerald-500/20 to-emerald-600/10 border-emerald-500/30', text: 'text-emerald-400' },
+              { icon: Workflow, title: 'Visual Workflow', desc: 'Build complex API logic with an intuitive drag-and-drop interface — no backend code required.', box: 'from-violet-500/20 to-violet-600/10 border-violet-500/30', text: 'text-violet-400' },
+              { icon: Shield, title: 'Built-in Validation', desc: 'Add request validation — required fields, types, regex, min/max — with clear error responses.', box: 'from-blue-500/20 to-blue-600/10 border-blue-500/30', text: 'text-blue-400' },
+              { icon: Rocket, title: 'One-Click Deploy', desc: 'Deploy your mock API instantly to a live endpoint you can curl from anywhere.', box: 'from-emerald-500/20 to-emerald-600/10 border-emerald-500/30', text: 'text-emerald-400' },
+              { icon: GitBranch, title: 'Conditional Branching', desc: 'Route requests through a safe expression evaluator to simulate real business logic.', box: 'from-amber-500/20 to-orange-600/10 border-amber-500/30', text: 'text-amber-400' },
+              { icon: Database, title: 'Stateful Mocks', desc: 'Persist state across requests with Redis — simulate carts, counters, and sessions.', box: 'from-fuchsia-500/20 to-pink-600/10 border-fuchsia-500/30', text: 'text-fuchsia-400' },
+              { icon: Layers, title: 'Ready-Made Templates', desc: 'Start from a library of workflow templates instead of an empty canvas.', box: 'from-cyan-500/20 to-sky-600/10 border-cyan-500/30', text: 'text-cyan-400' },
             ].map((f, i) => (
               <div
                 key={i}
@@ -380,27 +391,132 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="relative z-10 border-t border-indigo-500/10 py-10 px-6 bg-[#080a14]">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-indigo-300/40">
-            <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
-              <Zap className="w-3 h-3 text-white" />
-            </div>
-            <span className="text-sm font-medium">MockFlow</span>
+      {/* How it works */}
+      <section id="how-it-works" className="relative z-10 py-24 px-6 border-t border-indigo-500/10 scroll-mt-20">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl lg:text-4xl font-bold mb-4 bg-gradient-to-b from-white to-indigo-200 bg-clip-text text-transparent">
+              How MockFlow works
+            </h2>
+            <p className="text-indigo-200/60 max-w-lg mx-auto">
+              From empty canvas to a live endpoint, in three steps.
+            </p>
           </div>
-          <div className="text-sm text-indigo-300/40">
-            Built by{' '}
-            <Link
-              href="https://www.linkedin.com/in/shriraj-patil-526072227/"
-              target="_blank"
-              className="text-indigo-300/60 hover:text-indigo-300 transition-colors"
-            >
-              Shriraj Patil
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              { icon: MousePointerClick, step: '01', title: 'Design the flow', desc: 'Drag request, validation, transformation, conditional, state, and response nodes onto the canvas and wire them together.' },
+              { icon: PlugZap, step: '02', title: 'Test in the editor', desc: 'Run the workflow with the same engine that serves production, right inside the canvas — no deploy needed to iterate.' },
+              { icon: Rocket, step: '03', title: 'Deploy and share', desc: 'Click Deploy to get a live HTTP endpoint at /api/{workspace}/{path} that anyone on your team can curl.' },
+            ].map((s, i) => (
+              <div key={i} className="relative p-6 rounded-2xl bg-[#0d1024]/50 border border-indigo-500/10">
+                <span className="absolute top-5 right-6 text-4xl font-bold text-indigo-500/10">{s.step}</span>
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-500/20 to-violet-600/10 border border-indigo-500/30 flex items-center justify-center mb-5">
+                  <s.icon className="w-5 h-5 text-indigo-300" />
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-2">{s.title}</h3>
+                <p className="text-sm text-indigo-200/50 leading-relaxed">{s.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Use cases */}
+      <section id="use-cases" className="relative z-10 py-24 px-6 border-t border-indigo-500/10 scroll-mt-20">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl lg:text-4xl font-bold mb-4 bg-gradient-to-b from-white to-indigo-200 bg-clip-text text-transparent">
+              Built for teams who can&apos;t wait on a backend
+            </h2>
+            <p className="text-indigo-200/60 max-w-lg mx-auto">
+              A few of the ways people use MockFlow every day.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            {[
+              { icon: Terminal, title: 'Frontend development', desc: 'Build and ship UI against a realistic API before the real backend exists, so nobody is blocked waiting on another team.' },
+              { icon: Shield, title: 'QA & integration testing', desc: 'Simulate edge cases, error codes, and flaky third-party responses that are hard to reproduce against a real service.' },
+              { icon: Users, title: 'Demos & sales prototypes', desc: 'Stand up a convincing, stateful API for a demo or hackathon without provisioning real infrastructure.' },
+              { icon: PlugZap, title: 'Third-party API simulation', desc: 'Mock a vendor API you don’t control yet — including rate limits, auth errors, and paginated responses.' },
+            ].map((u, i) => (
+              <div key={i} className="flex items-start gap-4 p-6 rounded-2xl bg-[#0d1024]/50 border border-indigo-500/10 hover:border-indigo-500/30 transition-all">
+                <div className="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-violet-500/20 to-indigo-600/10 border border-violet-500/30 flex items-center justify-center">
+                  <u.icon className="w-5 h-5 text-violet-400" />
+                </div>
+                <div>
+                  <h3 className="text-base font-semibold text-white mb-1">{u.title}</h3>
+                  <p className="text-sm text-indigo-200/50 leading-relaxed">{u.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center mt-10">
+            <Link href="/use-cases" className="inline-flex items-center gap-1.5 text-sm text-indigo-300 hover:text-white transition-colors">
+              See detailed use cases
+              <ChevronRight className="w-4 h-4" />
             </Link>
           </div>
         </div>
-      </footer>
+      </section>
+
+      {/* FAQ */}
+      <section id="faq" className="relative z-10 py-24 px-6 border-t border-indigo-500/10 scroll-mt-20">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl lg:text-4xl font-bold mb-4 bg-gradient-to-b from-white to-indigo-200 bg-clip-text text-transparent">
+              Frequently asked questions
+            </h2>
+          </div>
+
+          <div className="space-y-3">
+            {FAQ_ITEMS.map((item, i) => (
+              <details
+                key={i}
+                className="group rounded-2xl bg-[#0d1024]/50 border border-indigo-500/10 open:border-indigo-500/30 transition-all"
+              >
+                <summary className="flex items-center justify-between gap-4 p-5 cursor-pointer list-none">
+                  <span className="font-medium text-white text-sm sm:text-base">{item.q}</span>
+                  <ChevronRight className="w-4 h-4 text-indigo-400 shrink-0 group-open:rotate-90 transition-transform" />
+                </summary>
+                <p className="px-5 pb-5 text-sm text-indigo-200/60 leading-relaxed">{item.a}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="relative z-10 py-20 px-6 border-t border-indigo-500/10">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-3xl lg:text-4xl font-bold mb-4 bg-gradient-to-b from-white to-indigo-200 bg-clip-text text-transparent">
+            Ready to build your first mock API?
+          </h2>
+          <p className="text-indigo-200/60 mb-8">
+            It&apos;s free, and you&apos;ll have a live endpoint in under a minute.
+          </p>
+          <Link href="/editor">
+            <Button
+              size="lg"
+              className="h-12 px-8 bg-gradient-to-r from-violet-600 via-indigo-600 to-violet-600 hover:from-violet-500 hover:via-indigo-500 hover:to-violet-500 font-medium rounded-xl text-base border-0 shadow-2xl shadow-indigo-500/25 transition-all hover:shadow-indigo-500/40 hover:scale-[1.02]"
+            >
+              Open the Editor
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          </Link>
+        </div>
+      </section>
+
+      <SiteFooter />
+
+      {/* FAQ structured data */}
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
 
       {/* CSS Animations */}
       <style dangerouslySetInnerHTML={{

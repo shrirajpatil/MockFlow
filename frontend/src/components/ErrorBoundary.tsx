@@ -95,30 +95,30 @@ export class ErrorBoundary extends Component<Props, State> {
 
             // Default error UI
             return (
-                <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-orange-50 p-4">
-                    <div className="max-w-2xl w-full bg-white rounded-2xl shadow-2xl p-8 border border-red-100">
+                <div className="min-h-screen flex items-center justify-center bg-[#0a0d1a] p-4">
+                    <div className="max-w-2xl w-full bg-[#0d1024]/80 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-red-500/20">
                         {/* Error Icon */}
                         <div className="flex justify-center mb-6">
-                            <div className="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center">
-                                <AlertTriangle className="w-10 h-10 text-red-600" />
+                            <div className="w-20 h-20 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center">
+                                <AlertTriangle className="w-10 h-10 text-red-400" />
                             </div>
                         </div>
 
                         {/* Error Title */}
-                        <h1 className="text-3xl font-bold text-center text-gray-900 mb-4">
+                        <h1 className="text-3xl font-bold text-center text-white mb-4">
                             Oops! Something went wrong
                         </h1>
 
                         {/* Error Description */}
-                        <p className="text-center text-gray-600 mb-8">
+                        <p className="text-center text-indigo-200/60 mb-8">
                             We're sorry for the inconvenience. An unexpected error occurred while rendering this page.
                         </p>
 
                         {/* Error Details (Development Only) */}
                         {process.env.NEXT_PUBLIC_ENVIRONMENT !== 'production' && this.state.error && (
-                            <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-lg">
-                                <h3 className="text-sm font-semibold text-red-900 mb-2">Error Details (Dev Only):</h3>
-                                <pre className="text-xs text-red-800 overflow-auto max-h-40 whitespace-pre-wrap">
+                            <div className="mb-8 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+                                <h3 className="text-sm font-semibold text-red-300 mb-2">Error Details (Dev Only):</h3>
+                                <pre className="text-xs text-red-300/80 overflow-auto max-h-40 whitespace-pre-wrap">
                                     {this.state.error.toString()}
                                     {this.state.errorInfo?.componentStack}
                                 </pre>
@@ -129,7 +129,7 @@ export class ErrorBoundary extends Component<Props, State> {
                         <div className="flex flex-col sm:flex-row gap-3 justify-center">
                             <Button
                                 onClick={this.handleReset}
-                                className="bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white"
+                                className="bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white border-0"
                             >
                                 <RefreshCw className="w-4 h-4 mr-2" />
                                 Try Again
@@ -138,7 +138,7 @@ export class ErrorBoundary extends Component<Props, State> {
                             <Button
                                 onClick={this.handleReload}
                                 variant="outline"
-                                className="border-indigo-200 hover:bg-indigo-50"
+                                className="border-indigo-500/20 bg-transparent hover:bg-indigo-500/10"
                             >
                                 <RefreshCw className="w-4 h-4 mr-2" />
                                 Reload Page
@@ -147,7 +147,7 @@ export class ErrorBoundary extends Component<Props, State> {
                             <Button
                                 onClick={this.handleGoHome}
                                 variant="outline"
-                                className="border-indigo-200 hover:bg-indigo-50"
+                                className="border-indigo-500/20 bg-transparent hover:bg-indigo-500/10"
                             >
                                 <Home className="w-4 h-4 mr-2" />
                                 Go Home
@@ -155,7 +155,7 @@ export class ErrorBoundary extends Component<Props, State> {
                         </div>
 
                         {/* Help Text */}
-                        <p className="text-center text-sm text-gray-500 mt-8">
+                        <p className="text-center text-sm text-indigo-200/40 mt-8">
                             If this problem persists, please contact support or try clearing your browser cache.
                         </p>
                     </div>

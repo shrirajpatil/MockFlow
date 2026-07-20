@@ -170,19 +170,19 @@ function ConnectTunnelDialog({
             <div className="space-y-4">
                 {/* Already connected — show the URL front and center */}
                 {status.active && status.url && (
-                    <div className="rounded-lg border border-emerald-300 bg-emerald-50 p-4 space-y-2">
-                        <div className="flex items-center gap-2 text-emerald-700 text-sm font-medium">
+                    <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-4 space-y-2">
+                        <div className="flex items-center gap-2 text-emerald-300 text-sm font-medium">
                             <CheckCircle2 className="w-4 h-4" /> Tunnel connected
                         </div>
                         <div className="flex items-center gap-2">
-                            <code className="text-xs flex-1 truncate bg-white border border-emerald-200 rounded px-2 py-1.5 text-emerald-900">
+                            <code className="text-xs flex-1 truncate bg-black/20 border border-emerald-500/20 rounded px-2 py-1.5 text-emerald-200">
                                 {status.url}
                             </code>
                             <Button variant="outline" size="sm" onClick={copyUrl}>
                                 {copied ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                             </Button>
                         </div>
-                        <p className="text-xs text-emerald-700/80">Paste this into your Request node&apos;s URL field instead of localhost.</p>
+                        <p className="text-xs text-emerald-300/70">Paste this into your Request node&apos;s URL field instead of localhost.</p>
                     </div>
                 )}
 
