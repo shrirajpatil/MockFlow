@@ -67,11 +67,20 @@ export function startControlServer(manager, port = parseInt(process.env.TUNNEL_C
                         return;
                     }
 
-                    writeTokenToEnv(ngrokToken.trim());
+                    const trimmedToken = ngrokToken.trim();
+                    writeTokenToEnv(trimmedToken);
+
+                    // Update the in-memory env immediately and restart the tunnel with
+                    // the new token — no need for the user to Ctrl+C and re-run the CLI.
+                    // Fire-and-forget: the frontend already polls /status for up to 8s.
+                    process.env.NGROK_AUTH_TOKEN = trimmedToken;
+                    manager.restart().catch(() => {});
+
                     res.writeHead(200, { 'Content-Type': 'application/json' });
                     res.end(JSON.stringify({
                         saved: true,
-                        message: 'Token saved to tunnel-agent/.env. Restart the tunnel agent (Ctrl+C then npm start) to apply it.',
+                        restarting: true,
+                        message: 'Token saved — connecting your tunnel now.',
                     }));
                 } catch {
                     res.writeHead(400, { 'Content-Type': 'application/json' });

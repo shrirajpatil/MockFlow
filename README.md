@@ -23,7 +23,7 @@ Frontend teams and integration testers constantly wait on backend endpoints that
 | Stateful mocks (state persists across requests via Redis) | ✅ |
 | Ready-made workflow templates | ✅ |
 | Real HTTP calls to external APIs from Request nodes | ✅ |
-| Local API testing via bundled ngrok tunnel agent | ✅ |
+| Local API testing via a no-signup SSH tunnel (bundled ngrok agent optional, for a persistent auto-detected tunnel) | ✅ |
 | Execution history, rate limiting, response caching | ✅ |
 | Undo/redo, keyboard shortcuts, import/export JSON | ✅ |
 | User accounts & authenticated multi-tenancy | 🔜 roadmap |
@@ -56,7 +56,7 @@ flowchart LR
 
 - **Editor** (`frontend/`) — the visual builder. The in-editor Test button runs workflows with the same node semantics as the serving engine.
 - **Serving engine** (`backend/`) — Netlify Functions. `execute` looks up deployed workflows by workspace + method + path and executes them server-side; `proxy` relays external API calls (with rate limiting and SSRF guards).
-- **Tunnel agent** (`tunnel-agent/`) — CLI that exposes an API on your machine through ngrok so cloud-deployed workflows can reach it.
+- **Local API access** — the editor's "Local APIs" dialog connects a Request node to an API on your machine via a no-signup SSH tunnel by default; `tunnel-agent/` is an optional ngrok-based CLI for a persistent, auto-detected tunnel instead.
 
 ## Quickstart
 
@@ -111,7 +111,7 @@ The repo deploys as a single Netlify site (`netlify.toml` builds the frontend an
 ```
 frontend/        Next.js editor UI
 backend/         Netlify Functions (execute, proxy, health) + serving engine
-tunnel-agent/    ngrok tunnel CLI for local API testing
+tunnel-agent/    Optional ngrok tunnel CLI for a persistent local API connection
 supabase-schema.sql   Canonical database schema
 docs/archive/    Historical setup notes and legacy schemas
 ```

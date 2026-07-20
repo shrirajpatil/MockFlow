@@ -96,10 +96,18 @@ export default function DocsPage() {
                 <h1 className="text-4xl font-bold mb-4 bg-gradient-to-b from-white to-indigo-200 bg-clip-text text-transparent">
                     Build a mock API with MockFlow
                 </h1>
-                <p className="text-lg text-indigo-200/60 mb-12 leading-relaxed">
+                <p className="text-lg text-indigo-200/60 mb-8 leading-relaxed">
                     MockFlow turns a mock API into a small graph of nodes on a canvas — no server code, no
                     deployment pipeline, no infrastructure to manage. This page covers everything you need to
                     build, test, and deploy your first endpoint.
+                </p>
+
+                <p className="text-indigo-200/60 mb-12 leading-relaxed rounded-xl border border-indigo-500/10 bg-[#0d1024]/50 p-5">
+                    <strong className="text-white">The mental model:</strong> a workflow is a pipeline. A{' '}
+                    <strong className="text-white">Request</strong> node defines when it runs, a{' '}
+                    <strong className="text-white">Response</strong> node defines what comes back. Everything in
+                    between — validation, transforms, branching, stored state — is optional logic you only add
+                    when you actually need it.
                 </p>
 
                 <section className="mb-14">
@@ -207,17 +215,17 @@ export default function DocsPage() {
                 <section className="mb-14">
                     <h2 className="text-2xl font-semibold mb-4 text-white">Testing an API on your own machine</h2>
                     <p className="text-indigo-200/60 mb-4 leading-relaxed">
-                        A Request node can call a real external API, but MockFlow&apos;s cloud proxy can&apos;t reach{' '}
-                        <Code>localhost</Code> on your computer directly. The bundled tunnel agent exposes your
-                        local API through ngrok so a deployed workflow can call it:
+                        A Request node can call a real external API, but MockFlow&apos;s cloud can&apos;t reach{' '}
+                        <Code>localhost</Code> on your computer directly. Click <strong className="text-white">Local APIs</strong> in
+                        the editor toolbar to connect one — no signup needed:
                     </p>
-                    <Pre>{`cd tunnel-agent
-npm install
-npm start`}</Pre>
+                    <Pre>{`ssh -R 80:localhost:{your-port} localhost.run`}</Pre>
                     <p className="text-indigo-200/60 mt-4 leading-relaxed">
-                        Click <strong className="text-white">Local APIs</strong> in the editor toolbar for a guided setup, including a free ngrok
-                        token. The agent runs entirely on your machine — your token is written to a local{' '}
-                        <Code>.env</Code> file and never sent to MockFlow&apos;s servers.
+                        Run that in a terminal (SSH ships with macOS, Linux, and Windows 10+), copy the URL it prints,
+                        and paste it into the dialog — it&apos;ll insert it straight into your Request node. Prefer a
+                        persistent, auto-detected tunnel instead? The same dialog has an <strong className="text-white">Advanced</strong> section
+                        for a bundled ngrok agent, which needs a free ngrok account and runs entirely on your machine —
+                        your token never touches MockFlow&apos;s servers.
                     </p>
                 </section>
 
