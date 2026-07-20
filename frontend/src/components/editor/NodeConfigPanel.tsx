@@ -10,7 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Trash2, Settings2, Sparkles, Terminal, Copy, Check } from 'lucide-react';
+import { Plus, Trash2, Settings2, Sparkles, Terminal } from 'lucide-react';
 import type { NodeData } from '@/types/nodes';
 
 const NodeConfigPanel = () => {
@@ -156,33 +156,21 @@ const RequestConfig = ({ data, updateData }: any) => {
 
 /**
  * Shown when a Request node's URL points at localhost/127.0.0.1 — the cloud
- * proxy can't reach it, so this walks the user through exposing it via the
- * bundled tunnel-agent (see WorkspaceTunnelSettings for the full dialog).
+ * can't reach it directly, so this points the user at the "Local APIs"
+ * dialog in the toolbar (see WorkspaceTunnelSettings), which is the single
+ * source of truth for setup steps.
  */
 const LocalhostHint = () => {
-    const [copied, setCopied] = useState(false);
-    const command = 'cd tunnel-agent && npm install && npm start';
-
-    const copy = () => {
-        navigator.clipboard.writeText(command);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-    };
-
     return (
-        <div className="bg-amber-500/10 border border-amber-400/30 rounded-lg p-3 space-y-2">
+        <div className="bg-amber-500/10 border border-amber-400/30 rounded-lg p-3 space-y-1.5">
             <p className="text-xs text-amber-200">
-                <span className="font-bold text-amber-300">Heads up:</span> localhost isn&apos;t reachable from the cloud.
-                Needs a free ngrok token first — see the <span className="font-medium">Local APIs</span> button in the
-                toolbar for setup, then run:
+                <span className="font-bold text-amber-300">Heads up:</span> this URL points at your own computer — MockFlow&apos;s
+                cloud can&apos;t reach it directly.
             </p>
-            <div className="flex items-center gap-2 bg-black/30 rounded-md px-2 py-1.5">
+            <p className="text-xs text-amber-200/80 flex items-center gap-1.5">
                 <Terminal className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                <code className="text-[11px] text-amber-100 flex-1 truncate">{command}</code>
-                <button onClick={copy} className="shrink-0 text-amber-300 hover:text-amber-100" title="Copy command">
-                    {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                </button>
-            </div>
+                Click <span className="font-medium text-amber-100">Local APIs</span> in the toolbar to connect it — no signup needed.
+            </p>
         </div>
     );
 };

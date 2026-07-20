@@ -35,7 +35,8 @@ program
         } catch (error) {
             console.error(chalk.red('Failed to start tunnel:'), error.message);
             console.log(chalk.yellow('\n💡 The control server is still running — open MockFlow\'s'));
-            console.log(chalk.yellow('   "Local APIs" panel to paste your ngrok token, then restart this command.\n'));
+            console.log(chalk.yellow('   "Local APIs" panel and paste your ngrok token there.'));
+            console.log(chalk.yellow('   The tunnel will connect automatically — no need to restart this command.\n'));
             console.log(chalk.gray('Press Ctrl+C to exit.\n'));
 
             // Keep the process (and control server) alive so the user can configure
@@ -139,7 +140,7 @@ program
     .action(() => {
         const controlServer = startControlServer(manager);
         console.log(chalk.gray('Open MockFlow → toolbar → "Local APIs" and paste your ngrok token.'));
-        console.log(chalk.gray('Press Ctrl+C to exit once configured, then run "npm start".\n'));
+        console.log(chalk.gray('The tunnel starts automatically once you do — press Ctrl+C here to stop it.\n'));
         process.on('SIGINT', () => { controlServer.close(); process.exit(0); });
     });
 

@@ -67,33 +67,29 @@ export default function OnboardingGuide({ open, onClose }: OnboardingGuideProps)
             content: (
                 <div className="space-y-4">
                     <div className="bg-gradient-to-br from-violet-500/10 to-purple-500/10 border border-violet-500/20 rounded-lg p-4">
-                        <h4 className="font-semibold text-violet-200 mb-3">The 6 node types (left sidebar):</h4>
+                        <h4 className="font-semibold text-violet-200 mb-1">The only two you need to start</h4>
+                        <p className="text-xs text-indigo-200/40 mb-3">Every workflow is just these two, connected.</p>
                         <div className="grid grid-cols-2 gap-3 text-sm">
                             <div className="bg-white/5 rounded p-3 border border-violet-500/20">
                                 <div className="font-medium text-violet-300">Request</div>
                                 <div className="text-xs text-indigo-200/40 mt-1">Defines the method + path that triggers this workflow</div>
                             </div>
                             <div className="bg-white/5 rounded p-3 border border-violet-500/20">
-                                <div className="font-medium text-violet-300">Validation</div>
-                                <div className="text-xs text-indigo-200/40 mt-1">Rejects requests missing required fields</div>
-                            </div>
-                            <div className="bg-white/5 rounded p-3 border border-violet-500/20">
-                                <div className="font-medium text-violet-300">Transformation</div>
-                                <div className="text-xs text-indigo-200/40 mt-1">Reshapes data before it reaches the response</div>
-                            </div>
-                            <div className="bg-white/5 rounded p-3 border border-violet-500/20">
-                                <div className="font-medium text-violet-300">Conditional</div>
-                                <div className="text-xs text-indigo-200/40 mt-1">Branches the flow — e.g. different response if unauthorized</div>
-                            </div>
-                            <div className="bg-white/5 rounded p-3 border border-violet-500/20">
-                                <div className="font-medium text-violet-300">State</div>
-                                <div className="text-xs text-indigo-200/40 mt-1">Remembers data between separate requests</div>
-                            </div>
-                            <div className="bg-white/5 rounded p-3 border border-violet-500/20">
                                 <div className="font-medium text-violet-300">Response</div>
                                 <div className="text-xs text-indigo-200/40 mt-1">What gets sent back — status code + JSON body</div>
                             </div>
                         </div>
+                    </div>
+                    <div className="rounded-lg border border-white/10 bg-white/[0.03] p-4">
+                        <h4 className="text-xs font-semibold text-indigo-200/60 uppercase tracking-wider mb-2.5">
+                            Add these later, only when your logic needs them
+                        </h4>
+                        <ul className="space-y-1.5 text-xs text-indigo-200/50">
+                            <li><span className="text-indigo-200/80 font-medium">Validation</span> — reject requests missing required fields</li>
+                            <li><span className="text-indigo-200/80 font-medium">Transformation</span> — reshape data before it reaches the response</li>
+                            <li><span className="text-indigo-200/80 font-medium">Conditional</span> — branch the flow, e.g. a different response if unauthorized</li>
+                            <li><span className="text-indigo-200/80 font-medium">State</span> — remember data between separate requests</li>
+                        </ul>
                     </div>
                     <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3">
                         <p className="text-sm text-amber-300">
@@ -140,7 +136,7 @@ export default function OnboardingGuide({ open, onClose }: OnboardingGuideProps)
                         <p className="text-sm text-blue-300">
                             🔌 <strong>Testing an API on your own computer?</strong> The cloud can&apos;t reach
                             <code className="bg-blue-500/20 px-1 rounded mx-1">localhost</code>
-                            directly — click <strong>Local APIs</strong> in the toolbar for a guided setup.
+                            directly — click <strong>Local APIs</strong> in the toolbar to connect one, no signup needed.
                         </p>
                     </div>
                 </div>

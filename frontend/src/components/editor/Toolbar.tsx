@@ -551,6 +551,12 @@ export default function Toolbar() {
                 </TooltipProvider>
             </div>
 
+            <GettingStartedStrip
+                buildDone={nodes.some((n) => (n.data as any)?.type === 'request') && nodes.some((n) => (n.data as any)?.type === 'response')}
+                testDone={testResult !== null}
+                saveDone={workflowId !== null}
+                deployDone={isDeployed}
+            />
 
             {/* Workspace Dialog — informational + recovery, never a place to type a new name */}
             <Dialog
@@ -894,5 +900,60 @@ export default function Toolbar() {
                 </DialogContent>
             </Dialog>
         </>
+    );
+}
+
+/**
+ * Slim, non-modal guidance that stays visible until the first deploy — unlike
+ * OnboardingGuide (a one-time popup), this keeps tracking Build/Test/Save/Deploy
+ * across the whole session so the "how do I use this" answer doesn't disappear
+ * after the first dismiss.
+ */
+function GettingStartedStrip({
+    buildDone,
+    testDone,
+    saveDone,
+    deployDone,
+}: {
+    buildDone: boolean;
+    testDone: boolean;
+    saveDone: boolean;
+    deployDone: boolean;
+}) {
+    const [dismissed, setDismissed] = useState(false);
+
+    if (deployDone || dismissed) return null;
+
+    const steps: { label: string; done: boolean }[] = [
+        { label: 'Build', done: buildDone },
+        { label: 'Test', done: testDone },
+        { label: 'Save', done: saveDone },
+        { label: 'Deploy', done: deployDone },
+    ];
+
+    return (
+        <div className="h-9 flex items-center justify-center gap-6 px-6 bg-[#0d1024]/80 border-b border-white/[0.06] text-xs relative z-40">
+            <span className="text-zinc-500 font-medium hidden sm:inline">Getting started:</span>
+            <div className="flex items-center gap-4">
+                {steps.map((step, i) => (
+                    <React.Fragment key={step.label}>
+                        {i > 0 && <span className="w-3 h-px bg-zinc-700 hidden sm:block" />}
+                        <span className={`flex items-center gap-1.5 ${step.done ? 'text-emerald-400' : 'text-zinc-500'}`}>
+                            {step.done ? <CheckCircle2 className="w-3.5 h-3.5" /> : (
+                                <span className="w-3.5 h-3.5 rounded-full border border-current flex items-center justify-center text-[9px]">{i + 1}</span>
+                            )}
+                            {step.label}
+                        </span>
+                    </React.Fragment>
+                ))}
+            </div>
+            <button
+                onClick={() => setDismissed(true)}
+                className="absolute right-4 text-zinc-600 hover:text-zinc-300 transition-colors text-[11px]"
+                title="Dismiss"
+            >
+                Dismiss
+            </button>
+        </div>
     );
 }

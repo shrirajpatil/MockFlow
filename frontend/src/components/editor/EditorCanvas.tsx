@@ -168,9 +168,9 @@ const EditorCanvasContent = () => {
     );
 };
 
-/** Shown only on a blank canvas — points new users at the two ways to start. */
+/** Shown only on a blank canvas — points new users at the ways to start. */
 const EmptyCanvasHint = () => {
-    const { setNodes, setEdges } = useStore();
+    const { nodes, setNodes, setEdges } = useStore();
 
     const loadStarterTemplate = () => {
         const starter = templates.find((t) => t.id === 'users-list') ?? templates[0];
@@ -178,6 +178,26 @@ const EmptyCanvasHint = () => {
             setNodes(starter.nodes);
             setEdges(starter.edges);
         }
+    };
+
+    const startWithBasics = () => {
+        const requestId = `request-${Date.now()}`;
+        const responseId = `response-${Date.now() + 1}`;
+        setNodes(nodes.concat([
+            {
+                id: requestId,
+                type: 'request',
+                position: { x: 250, y: 120 },
+                data: { label: 'Request', type: 'request', method: 'GET', path: '/api/endpoint' },
+            },
+            {
+                id: responseId,
+                type: 'response',
+                position: { x: 250, y: 320 },
+                data: { label: 'Response', type: 'response', statusCode: 200, bodyTemplate: '{}' },
+            },
+        ]));
+        setEdges([{ id: `${requestId}-${responseId}`, source: requestId, target: responseId }]);
     };
 
     return (
@@ -188,15 +208,24 @@ const EmptyCanvasHint = () => {
                 </div>
                 <h3 className="text-white font-semibold text-sm mb-1.5">Your canvas is empty</h3>
                 <p className="text-zinc-400 text-xs leading-relaxed mb-4">
-                    Drag a node from the sidebar to start building, or load a working example.
+                    Drag a node from the sidebar to start building, start from the smallest possible workflow, or load a working example.
                 </p>
-                <button
-                    onClick={loadStarterTemplate}
-                    className="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 rounded-lg px-3.5 py-2 transition-colors"
-                >
-                    <Sparkles className="w-3.5 h-3.5" />
-                    Load an example workflow
-                </button>
+                <div className="flex flex-col gap-2">
+                    <button
+                        onClick={loadStarterTemplate}
+                        className="inline-flex items-center justify-center gap-1.5 text-xs font-medium text-white bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 rounded-lg px-3.5 py-2 transition-colors"
+                    >
+                        <Sparkles className="w-3.5 h-3.5" />
+                        Load an example workflow
+                    </button>
+                    <button
+                        onClick={startWithBasics}
+                        className="inline-flex items-center justify-center gap-1.5 text-xs font-medium text-zinc-300 bg-transparent border border-white/10 hover:border-indigo-500/40 hover:text-white rounded-lg px-3.5 py-2 transition-colors"
+                    >
+                        <MousePointerClick className="w-3.5 h-3.5" />
+                        Start with the basics (Request → Response)
+                    </button>
+                </div>
             </div>
         </div>
     );
