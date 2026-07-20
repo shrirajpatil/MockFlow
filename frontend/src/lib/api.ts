@@ -1,4 +1,4 @@
-import { supabase, Workflow } from './supabase';
+import { supabase, Workflow, WorkflowExecution } from './supabase';
 import { Node, Edge } from 'reactflow';
 
 export interface SaveWorkflowParams {
@@ -170,6 +170,31 @@ export async function saveWorkflowExecution(
     } catch (error) {
         console.error('Error saving execution:', error);
         return false;
+    }
+}
+
+/**
+ * List recent executions for a workflow (deployed endpoint calls,
+ * recorded server-side by backend/src/mockEngine.ts).
+ */
+export async function listExecutions(workflowId: string, limit = 50): Promise<WorkflowExecution[]> {
+    try {
+        const { data, error } = await supabase
+            .from('workflow_executions')
+            .select('*')
+            .eq('workflow_id', workflowId)
+            .order('executed_at', { ascending: false })
+            .limit(limit);
+
+        if (error) {
+            console.error('Error listing executions:', error);
+            return [];
+        }
+
+        return data || [];
+    } catch (error) {
+        console.error('Error listing executions:', error);
+        return [];
     }
 }
 

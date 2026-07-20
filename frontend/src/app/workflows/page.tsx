@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, FileJson, Clock, Rocket, Trash2, Edit, Copy, ArrowLeft } from 'lucide-react';
+import { Plus, FileJson, Clock, Rocket, Trash2, Edit, Copy, ArrowLeft, Share2, CheckCircle2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { getOrCreateWorkspace, shortLabel } from '@/lib/workspace';
 import { useToast } from '@/hooks/use-toast';
@@ -39,6 +39,7 @@ export default function WorkflowsPage() {
     const [workflows, setWorkflows] = useState<Workflow[]>([]);
     const [loading, setLoading] = useState(true);
     const [workspace, setWorkspace] = useState<string | null>(null);
+    const [copiedShareId, setCopiedShareId] = useState<string | null>(null);
 
     useEffect(() => {
         const ws = getOrCreateWorkspace();
@@ -94,6 +95,13 @@ export default function WorkflowsPage() {
                 variant: 'destructive',
             });
         }
+    };
+
+    const copyShareLink = (workflow: Workflow) => {
+        const url = `${window.location.origin}/share?id=${workflow.id}`;
+        navigator.clipboard.writeText(url);
+        setCopiedShareId(workflow.id);
+        setTimeout(() => setCopiedShareId(null), 2000);
     };
 
     const duplicateWorkflow = async (workflow: Workflow) => {
@@ -255,6 +263,17 @@ export default function WorkflowsPage() {
                                                 >
                                                     <Copy className="w-3 h-3" />
                                                 </Button>
+                                                {workflow.deployed && (
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => copyShareLink(workflow)}
+                                                        title="Copy public read-only docs link"
+                                                        className="border-white/10 bg-transparent hover:bg-emerald-500/10 hover:text-emerald-300 hover:border-emerald-500/30"
+                                                    >
+                                                        {copiedShareId === workflow.id ? <CheckCircle2 className="w-3 h-3 text-emerald-400" /> : <Share2 className="w-3 h-3" />}
+                                                    </Button>
+                                                )}
                                                 <Button
                                                     variant="outline"
                                                     size="sm"

@@ -178,6 +178,9 @@ export class ServerWorkflowExecutor {
                 data: this.context.request.body,
                 timeout: data.timeout || 30000,
                 validateStatus: () => true,
+                // See proxy.ts: the URL is SSRF-checked above but a redirect
+                // target isn't, so don't auto-follow.
+                maxRedirects: 0,
             });
             this.context.variables.response = response.data;
             this.log(`External response: ${response.status}`);
@@ -383,24 +386,33 @@ export class ServerWorkflowExecutor {
 }
 
 /**
- * SSRF guard: reject URLs whose hostname is a literal private/reserved IP.
- * Mirrors backend/netlify/functions/proxy.ts's guard of the same name.
+ * SSRF guard: reject URLs whose hostname is a literal private/reserved IP
+ * (IPv4 and IPv6). Mirrors backend/netlify/functions/proxy.ts's guard of the
+ * same name.
  */
 function isPrivateAddress(url: string): boolean {
     try {
         const { hostname } = new URL(url);
-        if (!/^\d{1,3}(\.\d{1,3}){3}$/.test(hostname)) return false;
 
-        const octets = hostname.split('.').map(Number);
-        const [a, b] = octets as [number, number, number, number];
-        return (
-            a === 10 ||
-            a === 127 ||
-            (a === 172 && b >= 16 && b <= 31) ||
-            (a === 192 && b === 168) ||
-            (a === 169 && b === 254) ||
-            a === 0
-        );
+        if (/^\d{1,3}(\.\d{1,3}){3}$/.test(hostname)) {
+            const octets = hostname.split('.').map(Number);
+            const [a, b] = octets as [number, number, number, number];
+            return (
+                a === 10 ||
+                a === 127 ||
+                (a === 172 && b >= 16 && b <= 31) ||
+                (a === 192 && b === 168) ||
+                (a === 169 && b === 254) ||
+                a === 0
+            );
+        }
+
+        const h = hostname.replace(/^\[|\]$/g, '').toLowerCase();
+        if (h === '::1') return true;
+        if (/^f[cd][0-9a-f]{2}:/.test(h)) return true;
+        if (/^fe[89ab][0-9a-f]:/.test(h)) return true;
+
+        return false;
     } catch {
         return false;
     }
