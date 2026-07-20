@@ -2,6 +2,7 @@ import { Node, Edge } from 'reactflow';
 import type { NodeData } from '@/types/nodes';
 import { smartHTTPRequest, HTTPRequestConfig, HTTPResponse } from './httpClient';
 import { evaluateCondition } from './safeEval';
+import { generateFake } from './fakeData';
 
 export interface ExecutionContext {
     request: {
@@ -129,15 +130,20 @@ export class ProductionWorkflowExecutor {
     }
 
     private async executeRequestNode(data: any): Promise<Partial<ExecutionResult>> {
-        // Request node can make a real HTTP request if URL is provided
-        const url = data.url || data.baseUrl;
+        // The editor's single "URL / Path" field is dual-purpose: an absolute
+        // http(s) URL means "call this real API"; a relative path just defines
+        // this mock's own route. (data.url/data.baseUrl are legacy fields the
+        // node config UI never actually sets.)
+        const path: string = data.path || '';
+        const isAbsoluteUrl = /^https?:\/\//i.test(path);
+        const url = data.url || data.baseUrl || (isAbsoluteUrl ? path : '');
 
         if (url) {
-            this.log(`Making HTTP request: ${data.method || 'GET'} ${url}${data.path || ''}`);
+            this.log(`Making HTTP request: ${data.method || 'GET'} ${url}`);
 
             const config: HTTPRequestConfig = {
                 method: data.method || 'GET',
-                url: `${url}${data.path || ''}`,
+                url,
                 headers: this.arrayToObject(data.headers || []),
                 body: this.context.request.body,
                 auth: data.auth,
@@ -225,26 +231,68 @@ export class ProductionWorkflowExecutor {
         // Parse body template and replace variables
         let body = data.bodyTemplate || '{}';
 
-        // Replace {{variable}} with actual values
-        body = body.replace(/\{\{(\w+(?:\.\w+)*)\}\}/g, (match: string, path: string) => {
-            const value = this.getValueFromPath(path);
+        // Replace {{variable}} with actual values. Tolerate both {{path}} and
+        // "{{path}}" authoring styles — a quoted token is consumed whole so a
+        // string value isn't double-quoted into invalid JSON.
+        body = body.replace(/"?\{\{(\w+(?:\.\w+)*)\}\}"?/g, (match: string, path: string) => {
+            const value = this.resolvePath(path);
             return JSON.stringify(value);
         });
 
+        let result: Partial<ExecutionResult>;
         try {
             const parsedBody = JSON.parse(body);
-            return {
+            result = {
                 statusCode: data.statusCode || 200,
                 headers: this.arrayToObject(data.headers || []),
                 body: parsedBody,
             };
         } catch (e) {
-            return {
+            result = {
                 statusCode: data.statusCode || 200,
                 headers: this.arrayToObject(data.headers || []),
                 body: body,
             };
         }
+
+        return this.applyChaos(data.chaos, result);
+    }
+
+    /**
+     * Chaos mode: optionally delays the response and/or replaces it with a
+     * simulated failure, mirroring backend/src/workflowExecutor.ts so what
+     * you see in Test matches what a deployed endpoint actually does.
+     * Latency is capped at 5s regardless of configured value.
+     */
+    private async applyChaos(
+        chaos: { enabled?: boolean; latencyMinMs?: number; latencyMaxMs?: number; errorRate?: number; errorStatusCodes?: number[] } | undefined,
+        response: Partial<ExecutionResult>
+    ): Promise<Partial<ExecutionResult>> {
+        if (!chaos?.enabled) return response;
+
+        const minMs = Math.max(0, Math.min(Number(chaos.latencyMinMs) || 0, 5000));
+        const maxMs = Math.max(minMs, Math.min(Number(chaos.latencyMaxMs) || 0, 5000));
+        if (maxMs > 0) {
+            const delay = minMs === maxMs ? minMs : Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
+            this.log(`Chaos: delaying ${delay}ms`);
+            await new Promise((resolve) => setTimeout(resolve, delay));
+        }
+
+        const errorRate = Math.max(0, Math.min(Number(chaos.errorRate) || 0, 100));
+        if (errorRate > 0 && Math.random() * 100 < errorRate) {
+            const codes = Array.isArray(chaos.errorStatusCodes) && chaos.errorStatusCodes.length > 0
+                ? chaos.errorStatusCodes
+                : [500];
+            const statusCode = codes[Math.floor(Math.random() * codes.length)]!;
+            this.log(`Chaos: injecting simulated failure (${statusCode})`);
+            return {
+                statusCode,
+                headers: response.headers,
+                body: { error: 'Simulated failure (chaos mode)', statusCode },
+            };
+        }
+
+        return response;
     }
 
     private async executeStateNode(data: any): Promise<Partial<ExecutionResult>> {
@@ -268,11 +316,17 @@ export class ProductionWorkflowExecutor {
     /** Replace {{path}} in a string; a template that is exactly one placeholder keeps the value's type. */
     private renderTemplateValue(template: string): any {
         const exact = /^\{\{(\w+(?:\.\w+)*)\}\}$/.exec(template.trim());
-        if (exact) return this.getValueFromPath(exact[1]);
+        if (exact) return this.resolvePath(exact[1]);
         return template.replace(/\{\{(\w+(?:\.\w+)*)\}\}/g, (_m, path: string) => {
-            const value = this.getValueFromPath(path);
+            const value = this.resolvePath(path);
             return typeof value === 'string' ? value : JSON.stringify(value ?? null);
         });
+    }
+
+    /** {{fake.*}} generates a random value instead of reading the request context. */
+    private resolvePath(path: string): any {
+        if (path.startsWith('fake.')) return generateFake(path.slice(5));
+        return this.getValueFromPath(path);
     }
 
     private async executeConditionalNode(node: Node): Promise<Partial<ExecutionResult>> {

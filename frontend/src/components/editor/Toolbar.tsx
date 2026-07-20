@@ -1,14 +1,17 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Save, Play, Download, Upload, Trash2, Undo2, Redo2, FileJson, Keyboard, Rocket, Copy, CheckCircle2, Database, Zap, KeyRound } from 'lucide-react';
+import { Save, Play, Download, Upload, Trash2, Undo2, Redo2, FileJson, Keyboard, Rocket, Copy, CheckCircle2, Database, Zap, KeyRound, FileUp, History, Share2 } from 'lucide-react';
 import useStore from '@/store/useStore';
 import { WorkflowExecutor } from '@/lib/productionExecutor';
-import { saveWorkflow, updateWorkflow, deployWorkflow, undeployWorkflow, loadWorkflow } from '@/lib/api';
+import { saveWorkflow, updateWorkflow, deployWorkflow, undeployWorkflow, loadWorkflow, listExecutions } from '@/lib/api';
 import { templates } from '@/lib/templates';
+import { parseOpenApiSpec, ParsedOperation } from '@/lib/openapiImport';
 import { getOrCreateWorkspace, restoreWorkspace, shortLabel } from '@/lib/workspace';
 import { useToast } from '@/hooks/use-toast';
+import { WorkflowExecution } from '@/lib/supabase';
 import WorkspaceTunnelSettings from '@/components/WorkspaceTunnelSettings';
 import {
     Dialog,
@@ -30,6 +33,7 @@ import {
 
 
 export default function Toolbar() {
+    const router = useRouter();
     const { nodes, edges, setNodes, setEdges, undo, redo, canUndo, canRedo } = useStore();
     const { toast } = useToast();
     const [testDialogOpen, setTestDialogOpen] = useState(false);
@@ -38,6 +42,17 @@ export default function Toolbar() {
     const [shortcutsDialogOpen, setShortcutsDialogOpen] = useState(false);
     const [templatesDialogOpen, setTemplatesDialogOpen] = useState(false);
     const [deployDialogOpen, setDeployDialogOpen] = useState(false);
+    const [importDialogOpen, setImportDialogOpen] = useState(false);
+    const [importText, setImportText] = useState('');
+    const [importOps, setImportOps] = useState<ParsedOperation[] | null>(null);
+    const [importSelected, setImportSelected] = useState<Set<string>>(new Set());
+    const [importError, setImportError] = useState<string | null>(null);
+    const [importing, setImporting] = useState(false);
+    const [executionsDialogOpen, setExecutionsDialogOpen] = useState(false);
+    const [executions, setExecutions] = useState<WorkflowExecution[]>([]);
+    const [loadingExecutions, setLoadingExecutions] = useState(false);
+    const [expandedExecutionId, setExpandedExecutionId] = useState<string | null>(null);
+    const [shareCopied, setShareCopied] = useState(false);
     const [tryItResult, setTryItResult] = useState<string | null>(null);
     const [tryingIt, setTryingIt] = useState(false);
     const [testRequest, setTestRequest] = useState('{\n  "name": "John Doe",\n  "email": "john@example.com"\n}');
@@ -63,7 +78,7 @@ export default function Toolbar() {
     const [deploying, setDeploying] = useState(false);
     const [copied, setCopied] = useState(false);
 
-    // Workspace ID is generated locally on first visit — never user-typed, so two
+    // Workspace ID is generated locally on first visit, never user-typed, so two
     // people can never collide into the same workspace by picking the same name.
     useEffect(() => {
         setWorkspace(getOrCreateWorkspace());
@@ -244,7 +259,7 @@ export default function Toolbar() {
             } catch { /* keep raw */ }
             setTryItResult(`HTTP ${response.status}\n\n${pretty}`);
         } catch (error: any) {
-            setTryItResult(`Request failed: ${error.message}\n\nNote: deployed endpoints are served by Netlify Functions — run "netlify dev" locally or use your deployed site URL.`);
+            setTryItResult(`Request failed: ${error.message}\n\nNote: deployed endpoints are served by Netlify Functions. Run "netlify dev" locally or use your deployed site URL.`);
         } finally {
             setTryingIt(false);
         }
@@ -379,33 +394,146 @@ export default function Toolbar() {
         toast({ title: `Template loaded: ${template.name}`, description: 'Test it, then Save and Deploy.' });
     };
 
+    const parseImportText = (text: string) => {
+        try {
+            const ops = parseOpenApiSpec(text);
+            setImportOps(ops);
+            setImportSelected(new Set(ops.map(o => o.key)));
+            setImportError(null);
+        } catch (error: any) {
+            setImportOps(null);
+            setImportError(error.message || 'Failed to parse spec');
+        }
+    };
+
+    const handleImportFile = () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json,.yaml,.yml';
+        input.onchange = (e: any) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const text = (event.target?.result as string) || '';
+                setImportText(text);
+                parseImportText(text);
+            };
+            reader.readAsText(file);
+        };
+        input.click();
+    };
+
+    const toggleImportSelected = (key: string) => {
+        setImportSelected(prev => {
+            const next = new Set(prev);
+            if (next.has(key)) next.delete(key); else next.add(key);
+            return next;
+        });
+    };
+
+    const handleImportConfirm = async () => {
+        if (!importOps) return;
+        if (!workspace) {
+            toast({ title: 'Set a workspace first', description: 'Your workspace namespaces your workflows and API URLs.' });
+            setWorkspaceDialogOpen(true);
+            return;
+        }
+
+        const selected = importOps.filter(op => importSelected.has(op.key));
+        if (selected.length === 0) return;
+
+        setImporting(true);
+        try {
+            const saved: any[] = [];
+            for (const op of selected) {
+                const result = await saveWorkflow({
+                    name: `${op.method} ${op.path}`,
+                    description: op.summary,
+                    nodes: op.nodes,
+                    edges: op.edges,
+                    workspace,
+                });
+                if (result) saved.push(result);
+            }
+
+            toast({ title: `Imported ${saved.length} endpoint${saved.length === 1 ? '' : 's'}` });
+            setImportDialogOpen(false);
+            setImportText('');
+            setImportOps(null);
+
+            if (saved.length === 1) {
+                const wf = saved[0];
+                setNodes(wf.nodes || []);
+                setEdges(wf.edges || []);
+                setWorkflowId(wf.id);
+                setWorkflowName(wf.name);
+                setWorkflowDescription(wf.description || '');
+                setIsDeployed(false);
+            } else if (saved.length > 1) {
+                router.push('/workflows');
+            }
+        } catch (error: any) {
+            toast({ title: 'Import failed', description: error.message, variant: 'destructive' });
+        } finally {
+            setImporting(false);
+        }
+    };
+
+    const handleOpenExecutions = async () => {
+        if (!workflowId) return;
+        setExecutionsDialogOpen(true);
+        setLoadingExecutions(true);
+        setExpandedExecutionId(null);
+        try {
+            const data = await listExecutions(workflowId);
+            setExecutions(data);
+        } finally {
+            setLoadingExecutions(false);
+        }
+    };
+
+    const getShareUrl = () => {
+        if (!workflowId) return null;
+        return `${window.location.origin}/share?id=${workflowId}`;
+    };
+
+    const copyShareUrl = () => {
+        const url = getShareUrl();
+        if (url) {
+            navigator.clipboard.writeText(url);
+            setShareCopied(true);
+            setTimeout(() => setShareCopied(false), 2000);
+        }
+    };
+
     return (
         <>
-            <div className="h-14 flex items-center justify-between px-6 bg-zinc-900/95 backdrop-blur-xl border-b border-white/[0.08] z-50 relative sticky top-0">
+            <div className="h-14 flex items-center justify-between px-6 bg-[#0b0b0d]/95 backdrop-blur-xl hairline-b border-b z-50 relative sticky top-0">
                 <div className="flex items-center gap-5">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 via-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/25">
-                            <Zap className="w-5 h-5 text-white" />
+                        <div className="w-8 h-8 rounded-lg bg-violet-500 flex items-center justify-center">
+                            <Zap className="w-4 h-4 text-[#0b0b0d]" />
                         </div>
                         <div>
-                            <h1 className="font-bold text-base text-white tracking-tight leading-none">
-                                MockFlow <span className="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">Studio</span>
+                            <h1 className="font-semibold text-[15px] text-white tracking-tight leading-none">
+                                MockFlow <span className="text-white/40 font-normal">Studio</span>
                             </h1>
-                            <span className="text-[10px] text-zinc-500 font-medium uppercase tracking-wide block mt-0.5">
+                            <span className="text-[10px] text-white/30 font-medium uppercase tracking-wide block mt-0.5">
                                 Visual Builder
                             </span>
                         </div>
                     </div>
 
                     <div className="hidden md:flex items-center gap-2 text-xs">
-                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-800/60 border border-zinc-700/50 text-zinc-300">
+                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full surface-raised text-white/60">
                             <span className="flex items-center gap-1.5">
-                                <span className={`w-1.5 h-1.5 rounded-full ${nodeCount > 0 ? 'bg-indigo-400' : 'bg-zinc-600'}`}></span>
+                                <span className={`w-1.5 h-1.5 rounded-full ${nodeCount > 0 ? 'bg-violet-400' : 'bg-white/20'}`}></span>
                                 {nodeCount} Nodes
                             </span>
-                            <span className="w-px h-3 bg-zinc-700"></span>
+                            <span className="w-px h-3 bg-white/10"></span>
                             <span className="flex items-center gap-1.5">
-                                <span className={`w-1.5 h-1.5 rounded-full ${edgeCount > 0 ? 'bg-violet-400' : 'bg-zinc-600'}`}></span>
+                                <span className={`w-1.5 h-1.5 rounded-full ${edgeCount > 0 ? 'bg-violet-400' : 'bg-white/20'}`}></span>
                                 {edgeCount} Edges
                             </span>
                         </div>
@@ -413,7 +541,7 @@ export default function Toolbar() {
                         {workspace && (
                             <button
                                 onClick={() => setWorkspaceDialogOpen(true)}
-                                className="px-3 py-1.5 rounded-full bg-violet-500/20 text-violet-300 border border-violet-500/30 flex items-center gap-2 hover:bg-violet-500/30 transition-colors font-mono"
+                                className="px-3 py-1.5 rounded-full bg-violet-500/10 text-violet-300 border border-violet-500/20 flex items-center gap-2 hover:bg-violet-500/15 transition-colors font-mono"
                                 title="View or restore your workspace"
                             >
                                 <Database className="w-3 h-3" /> {shortLabel(workspace)}
@@ -456,6 +584,16 @@ export default function Toolbar() {
 
                         <Tooltip>
                             <TooltipTrigger asChild>
+                                <Button variant="ghost" size="sm" onClick={() => setImportDialogOpen(true)} className="text-zinc-300 hover:bg-zinc-800 hover:text-white">
+                                    <FileUp className="w-4 h-4 mr-2" />
+                                    Import OpenAPI
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Generate workflows from an OpenAPI/Swagger spec</TooltipContent>
+                        </Tooltip>
+
+                        <Tooltip>
+                            <TooltipTrigger asChild>
                                 <Button variant="ghost" size="sm" onClick={handleLoad} className="text-zinc-300 hover:bg-zinc-800 hover:text-white">
                                     <Upload className="w-4 h-4 mr-2" />
                                     Load
@@ -481,8 +619,8 @@ export default function Toolbar() {
                                     onClick={handleDeploy}
                                     disabled={!workflowId || deploying}
                                     className={isDeployed
-                                        ? "bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white border-0"
-                                        : "bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white border-0"
+                                        ? "bg-emerald-500 hover:bg-emerald-400 text-[#0b0b0d] border-0"
+                                        : "bg-violet-500 hover:bg-violet-400 text-[#0b0b0d] border-0"
                                     }
                                 >
                                     {isDeployed ? <CheckCircle2 className="w-4 h-4 mr-2" /> : <Rocket className="w-4 h-4 mr-2" />}
@@ -504,6 +642,27 @@ export default function Toolbar() {
                             </Tooltip>
                         )}
 
+                        {isDeployed && workflowId && (
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button variant="ghost" size="sm" onClick={copyShareUrl} className="text-zinc-300 hover:bg-zinc-800 hover:text-white">
+                                        {shareCopied ? <CheckCircle2 className="w-4 h-4 mr-2 text-emerald-400" /> : <Share2 className="w-4 h-4 mr-2" />}
+                                        {shareCopied ? 'Copied!' : 'Share'}
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Copy a public read-only docs page link</TooltipContent>
+                            </Tooltip>
+                        )}
+
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button variant="ghost" size="sm" onClick={handleOpenExecutions} disabled={!workflowId} className="text-zinc-300 hover:bg-zinc-800 hover:text-white disabled:text-zinc-600">
+                                    <History className="w-4 h-4" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>{workflowId ? 'Execution history' : 'Save the workflow first'}</TooltipContent>
+                        </Tooltip>
+
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <Button variant="ghost" size="sm" onClick={handleSaveToFile} className="text-zinc-300 hover:bg-zinc-800 hover:text-white">
@@ -518,7 +677,7 @@ export default function Toolbar() {
 
                         <Tooltip>
                             <TooltipTrigger asChild>
-                                <Button className="bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-600 text-white border-0" size="sm" onClick={() => setTestDialogOpen(true)}>
+                                <Button variant="outline" className="border-violet-500/30 text-violet-300 hover:bg-violet-500/10 hover:text-violet-200" size="sm" onClick={() => setTestDialogOpen(true)}>
                                     <Play className="w-4 h-4 mr-2" />
                                     Test
                                 </Button>
@@ -558,7 +717,7 @@ export default function Toolbar() {
                 deployDone={isDeployed}
             />
 
-            {/* Workspace Dialog — informational + recovery, never a place to type a new name */}
+            {/* Workspace Dialog: informational + recovery, never a place to type a new name */}
             <Dialog
                 open={workspaceDialogOpen}
                 onOpenChange={(open) => {
@@ -572,9 +731,9 @@ export default function Toolbar() {
             >
                 <DialogContent className="border-indigo-500/20">
                     <DialogHeader>
-                        <DialogTitle className="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">Your workspace</DialogTitle>
+                        <DialogTitle className="text-white">Your workspace</DialogTitle>
                         <DialogDescription>
-                            Namespaces your workflows and API URLs. Generated automatically for this browser — nobody else can guess it.
+                            Namespaces your workflows and API URLs. Generated automatically for this browser, so nobody else can guess it.
                         </DialogDescription>
                     </DialogHeader>
 
@@ -603,7 +762,7 @@ export default function Toolbar() {
 
                             <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3">
                                 <p className="text-xs text-amber-300">
-                                    <span className="font-bold">Keep this private.</span> Anyone with this ID can see and edit everything in this workspace — treat it like a password, not a username.
+                                    <span className="font-bold">Keep this private.</span> Anyone with this ID can see and edit everything in this workspace. Treat it like a password, not a username.
                                 </p>
                             </div>
 
@@ -643,7 +802,7 @@ export default function Toolbar() {
                                     Cancel
                                 </Button>
                                 <Button
-                                    className="flex-1 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700"
+                                    className="flex-1 bg-violet-500 hover:bg-violet-400 text-[#0b0b0d] border-0"
                                     onClick={() => {
                                         const result = restoreWorkspace(restoreCode);
                                         if (!result.ok) {
@@ -699,7 +858,7 @@ export default function Toolbar() {
                         <Button
                             onClick={handleSaveToDatabase}
                             disabled={!workflowName.trim() || saving}
-                            className="w-full bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700"
+                            className="w-full bg-violet-500 hover:bg-violet-400 text-[#0b0b0d] border-0"
                         >
                             {saving ? 'Saving...' : 'Save Workflow'}
                         </Button>
@@ -728,15 +887,15 @@ export default function Toolbar() {
                             />
                         </div>
 
-                        <Button onClick={handleTest} disabled={testing} className="w-full bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-600">
+                        <Button onClick={handleTest} disabled={testing} className="w-full bg-violet-500 hover:bg-violet-400 text-[#0b0b0d] border-0">
                             {testing ? 'Testing...' : 'Run Test'}
                         </Button>
 
                         {testResult && (
-                            <div className="space-y-2">
+                            <div className="space-y-2 min-w-0">
                                 <Label>Result</Label>
-                                <ScrollArea className="h-[300px] border border-indigo-500/20 rounded-md p-4">
-                                    <div className="space-y-2">
+                                <ScrollArea className="h-[300px] w-full border border-indigo-500/20 rounded-md p-4">
+                                    <div className="space-y-2 min-w-0">
                                         <div className="flex items-center gap-2">
                                             <span className="font-semibold">Status:</span>
                                             <span className={testResult.success ? 'text-emerald-400' : 'text-red-400'}>
@@ -752,27 +911,27 @@ export default function Toolbar() {
                                         )}
 
                                         {testResult.body && (
-                                            <div className="space-y-1">
+                                            <div className="space-y-1 min-w-0">
                                                 <span className="font-semibold">Response Body:</span>
-                                                <pre className="bg-black/20 p-2 rounded text-xs overflow-auto">
+                                                <pre className="bg-black/20 p-2 rounded text-xs whitespace-pre-wrap break-words min-w-0">
                                                     {JSON.stringify(testResult.body, null, 2)}
                                                 </pre>
                                             </div>
                                         )}
 
                                         {testResult.error && (
-                                            <div className="space-y-1">
+                                            <div className="space-y-1 min-w-0">
                                                 <span className="font-semibold text-red-400">Error:</span>
-                                                <pre className="bg-red-500/10 p-2 rounded text-xs text-red-300">
+                                                <pre className="bg-red-500/10 p-2 rounded text-xs text-red-300 whitespace-pre-wrap break-words min-w-0">
                                                     {testResult.error}
                                                 </pre>
                                             </div>
                                         )}
 
                                         {testResult.logs && testResult.logs.length > 0 && (
-                                            <div className="space-y-1">
+                                            <div className="space-y-1 min-w-0">
                                                 <span className="font-semibold">Execution Logs:</span>
-                                                <pre className="bg-black/20 p-2 rounded text-xs overflow-auto">
+                                                <pre className="bg-black/20 p-2 rounded text-xs whitespace-pre-wrap break-words min-w-0">
                                                     {testResult.logs.join('\n')}
                                                 </pre>
                                             </div>
@@ -823,7 +982,7 @@ export default function Toolbar() {
                             </pre>
                         </div>
 
-                        <Button onClick={handleTryIt} disabled={tryingIt} className="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700">
+                        <Button onClick={handleTryIt} disabled={tryingIt} className="w-full bg-emerald-500 hover:bg-emerald-400 text-[#0b0b0d] border-0">
                             {tryingIt ? 'Calling endpoint...' : 'Try it now'}
                         </Button>
 
@@ -842,7 +1001,7 @@ export default function Toolbar() {
                     <DialogHeader>
                         <DialogTitle>Start from a template</DialogTitle>
                         <DialogDescription>
-                            Ready-made workflows — load one, Test it, then Save and Deploy.
+                            Ready-made workflows: load one, Test it, then Save and Deploy.
                         </DialogDescription>
                     </DialogHeader>
 
@@ -858,6 +1017,153 @@ export default function Toolbar() {
                             </button>
                         ))}
                     </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* Import OpenAPI Dialog */}
+            <Dialog
+                open={importDialogOpen}
+                onOpenChange={(open) => {
+                    setImportDialogOpen(open);
+                    if (!open) {
+                        setImportOps(null);
+                        setImportError(null);
+                        setImportText('');
+                    }
+                }}
+            >
+                <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto border-indigo-500/20">
+                    <DialogHeader>
+                        <DialogTitle>Import from OpenAPI</DialogTitle>
+                        <DialogDescription>
+                            Paste or upload an OpenAPI/Swagger spec (JSON or YAML). Each operation becomes a ready-to-deploy workflow.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    {!importOps ? (
+                        <div className="space-y-4">
+                            <Textarea
+                                value={importText}
+                                onChange={(e) => setImportText(e.target.value)}
+                                placeholder={'{\n  "openapi": "3.0.0",\n  "paths": { ... }\n}'}
+                                rows={10}
+                                className="font-mono text-xs border-indigo-500/20 bg-transparent"
+                            />
+                            {importError && <p className="text-xs text-destructive">{importError}</p>}
+                            <div className="flex gap-2">
+                                <Button variant="outline" className="flex-1" onClick={handleImportFile}>
+                                    <Upload className="w-4 h-4 mr-2" />
+                                    Upload file
+                                </Button>
+                                <Button
+                                    className="flex-1 bg-violet-500 hover:bg-violet-400 text-[#0b0b0d] border-0"
+                                    onClick={() => parseImportText(importText)}
+                                    disabled={!importText.trim()}
+                                >
+                                    Parse spec
+                                </Button>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            <p className="text-xs text-white/50">
+                                {importOps.length} endpoint{importOps.length === 1 ? '' : 's'} found. Uncheck any you don&apos;t want to import.
+                            </p>
+                            <div className="space-y-1.5 max-h-[320px] overflow-y-auto pr-1">
+                                {importOps.map((op) => {
+                                    const selected = importSelected.has(op.key);
+                                    return (
+                                        <button
+                                            key={op.key}
+                                            onClick={() => toggleImportSelected(op.key)}
+                                            className={`w-full text-left flex items-center gap-3 p-2.5 rounded-lg border transition-colors ${selected ? 'border-violet-500/40 bg-violet-500/10' : 'border-white/10 hover:border-white/20'}`}
+                                        >
+                                            <span className={`w-4 h-4 rounded flex items-center justify-center border shrink-0 ${selected ? 'bg-violet-500 border-violet-500' : 'border-white/20'}`}>
+                                                {selected && <CheckCircle2 className="w-3 h-3 text-[#0b0b0d]" />}
+                                            </span>
+                                            <span className="px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300 font-bold text-[10px] border border-blue-500/20 shrink-0">
+                                                {op.method}
+                                            </span>
+                                            <span className="font-mono text-xs text-white/70 truncate flex-1">{op.path}</span>
+                                            {op.summary && (
+                                                <span className="text-[10px] text-white/35 truncate max-w-[140px] shrink-0">{op.summary}</span>
+                                            )}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                            <div className="flex gap-2">
+                                <Button variant="ghost" className="flex-1" onClick={() => { setImportOps(null); setImportError(null); }}>
+                                    Back
+                                </Button>
+                                <Button
+                                    className="flex-1 bg-violet-500 hover:bg-violet-400 text-[#0b0b0d] border-0"
+                                    onClick={handleImportConfirm}
+                                    disabled={importing || importSelected.size === 0}
+                                >
+                                    {importing ? 'Importing...' : `Import ${importSelected.size} endpoint${importSelected.size === 1 ? '' : 's'}`}
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
+
+            {/* Execution History Dialog */}
+            <Dialog open={executionsDialogOpen} onOpenChange={setExecutionsDialogOpen}>
+                <DialogContent className="max-w-2xl max-h-[80vh] border-indigo-500/20">
+                    <DialogHeader>
+                        <DialogTitle>Execution history</DialogTitle>
+                        <DialogDescription>
+                            Recent calls to this workflow&apos;s deployed endpoint.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <ScrollArea className="h-[420px] pr-2">
+                        {loadingExecutions ? (
+                            <p className="text-xs text-white/40 py-8 text-center">Loading...</p>
+                        ) : executions.length === 0 ? (
+                            <p className="text-xs text-white/40 py-8 text-center">No executions yet. Deploy this workflow and call the endpoint to see them here.</p>
+                        ) : (
+                            <div className="space-y-2 min-w-0">
+                                {executions.map((exec) => {
+                                    const expanded = expandedExecutionId === exec.id;
+                                    return (
+                                        <div key={exec.id} className="border border-white/10 rounded-lg overflow-hidden">
+                                            <button
+                                                onClick={() => setExpandedExecutionId(expanded ? null : exec.id)}
+                                                className="w-full flex items-center gap-3 p-2.5 text-left hover:bg-white/5"
+                                            >
+                                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border shrink-0 ${exec.status === 'success' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'}`}>
+                                                    {exec.status}
+                                                </span>
+                                                <span className="font-mono text-xs text-white/60 truncate flex-1">
+                                                    {(exec.request_data as any)?.method || ''} {(exec.request_data as any)?.path || ''}
+                                                </span>
+                                                <span className="text-[10px] text-white/30 shrink-0">{new Date(exec.executed_at).toLocaleString()}</span>
+                                            </button>
+                                            {expanded && (
+                                                <div className="border-t border-white/10 p-2.5 space-y-2 bg-black/20 min-w-0">
+                                                    <div className="min-w-0">
+                                                        <span className="text-[10px] uppercase text-white/35 font-semibold">Request</span>
+                                                        <pre className="text-xs bg-black/30 p-2 rounded mt-1 whitespace-pre-wrap break-words">
+                                                            {JSON.stringify(exec.request_data, null, 2)}
+                                                        </pre>
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <span className="text-[10px] uppercase text-white/35 font-semibold">Response</span>
+                                                        <pre className="text-xs bg-black/30 p-2 rounded mt-1 whitespace-pre-wrap break-words">
+                                                            {JSON.stringify(exec.response_data, null, 2)}
+                                                        </pre>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </ScrollArea>
                 </DialogContent>
             </Dialog>
 
@@ -904,7 +1210,7 @@ export default function Toolbar() {
 }
 
 /**
- * Slim, non-modal guidance that stays visible until the first deploy — unlike
+ * Slim, non-modal guidance that stays visible until the first deploy. Unlike
  * OnboardingGuide (a one-time popup), this keeps tracking Build/Test/Save/Deploy
  * across the whole session so the "how do I use this" answer doesn't disappear
  * after the first dismiss.

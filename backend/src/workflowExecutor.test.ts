@@ -161,6 +161,93 @@ describe('ServerWorkflowExecutor', () => {
         expect(result.statusCode).toBe(200);
     });
 
+    it('resolves {{fake.*}} tokens to generated values, not literal lookups', async () => {
+        const nodes: WorkflowNode[] = [
+            { id: 'r1', data: { type: 'request', method: 'POST', path: '/x' } },
+            {
+                id: 'resp1',
+                data: {
+                    type: 'response',
+                    statusCode: 200,
+                    bodyTemplate: '{"id": {{fake.uuid}}, "email": {{fake.email}}, "n": {{fake.number}}}',
+                },
+            },
+        ];
+        const edges: WorkflowEdge[] = [{ id: 'e1', source: 'r1', target: 'resp1' }];
+
+        const result = await run(nodes, edges);
+        expect(result.statusCode).toBe(200);
+        expect(result.body.id).toMatch(/^[0-9a-f-]{36}$/);
+        expect(result.body.email).toMatch(/@/);
+        expect(typeof result.body.n).toBe('number');
+
+        // Two separate executions should (almost always) produce different fake values.
+        const again = await run(nodes, edges);
+        expect(again.body.id).not.toBe(result.body.id);
+    });
+
+    it('chaos mode injects a simulated error at a 100% error rate', async () => {
+        const nodes: WorkflowNode[] = [
+            { id: 'r1', data: { type: 'request', method: 'GET', path: '/x' } },
+            {
+                id: 'resp1',
+                data: {
+                    type: 'response',
+                    statusCode: 200,
+                    bodyTemplate: '{"ok": true}',
+                    chaos: { enabled: true, errorRate: 100, errorStatusCodes: [503] },
+                },
+            },
+        ];
+        const edges: WorkflowEdge[] = [{ id: 'e1', source: 'r1', target: 'resp1' }];
+
+        const result = await run(nodes, edges);
+        expect(result.statusCode).toBe(503);
+        expect(result.body).toMatchObject({ statusCode: 503 });
+    });
+
+    it('chaos mode leaves the response untouched at a 0% error rate', async () => {
+        const nodes: WorkflowNode[] = [
+            { id: 'r1', data: { type: 'request', method: 'GET', path: '/x' } },
+            {
+                id: 'resp1',
+                data: {
+                    type: 'response',
+                    statusCode: 200,
+                    bodyTemplate: '{"ok": true}',
+                    chaos: { enabled: true, errorRate: 0, latencyMinMs: 0, latencyMaxMs: 0 },
+                },
+            },
+        ];
+        const edges: WorkflowEdge[] = [{ id: 'e1', source: 'r1', target: 'resp1' }];
+
+        const result = await run(nodes, edges);
+        expect(result.statusCode).toBe(200);
+        expect(result.body).toEqual({ ok: true });
+    });
+
+    it('caps chaos latency at 5s even if a larger value is configured', async () => {
+        const nodes: WorkflowNode[] = [
+            { id: 'r1', data: { type: 'request', method: 'GET', path: '/x' } },
+            {
+                id: 'resp1',
+                data: {
+                    type: 'response',
+                    statusCode: 200,
+                    bodyTemplate: '{"ok": true}',
+                    chaos: { enabled: true, latencyMinMs: 20, latencyMaxMs: 20, errorRate: 0 },
+                },
+            },
+        ];
+        const edges: WorkflowEdge[] = [{ id: 'e1', source: 'r1', target: 'resp1' }];
+
+        const start = Date.now();
+        const result = await run(nodes, edges);
+        const elapsed = Date.now() - start;
+        expect(result.statusCode).toBe(200);
+        expect(elapsed).toBeGreaterThanOrEqual(15); // allows for timer slack
+    });
+
     it('guards against infinite loops', async () => {
         const nodes: WorkflowNode[] = [
             { id: 'r1', data: { type: 'request', method: 'GET', path: '/x' } },

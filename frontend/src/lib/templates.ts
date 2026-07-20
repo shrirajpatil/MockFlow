@@ -111,7 +111,7 @@ export const templates: WorkflowTemplate[] = [
     {
         id: 'conditional-auth',
         name: 'Conditional branching',
-        description: 'POST /login returns 200 when the password matches, 401 otherwise — shows true/false branches.',
+        description: 'POST /login returns 200 when the password matches and 401 otherwise, showing true/false branches.',
         nodes: [
             {
                 id: 'request-1',

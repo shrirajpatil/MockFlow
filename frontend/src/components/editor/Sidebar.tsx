@@ -7,10 +7,10 @@ import { Inbox, Shield, Shuffle, Send, Database, GitBranch, Sparkles } from 'luc
 
 export default function Sidebar() {
     const nodeTypes = [
-        { type: 'request', label: 'Request', icon: Inbox, desc: 'API endpoint', gradient: 'from-blue-500 to-indigo-600', tooltip: 'Where a call comes in — set the method and path, e.g. GET /users/:id.' },
+        { type: 'request', label: 'Request', icon: Inbox, desc: 'API endpoint', gradient: 'from-blue-500 to-indigo-600', tooltip: 'Where a call comes in. Set the method and path, e.g. GET /users/:id.' },
         { type: 'validation', label: 'Validation', icon: Shield, desc: 'Validate data', gradient: 'from-violet-500 to-purple-600', tooltip: "Reject bad input before your logic runs, e.g. require an email field." },
         { type: 'transformation', label: 'Transform', icon: Shuffle, desc: 'Modify data', gradient: 'from-amber-500 to-orange-600', tooltip: 'Copy or reshape a value for later, e.g. combine first+last name into fullName.' },
-        { type: 'response', label: 'Response', icon: Send, desc: 'Return result', gradient: 'from-emerald-500 to-teal-600', tooltip: "What gets sent back — status code and JSON body, e.g. 200 with {status:'ok'}." },
+        { type: 'response', label: 'Response', icon: Send, desc: 'Return result', gradient: 'from-emerald-500 to-teal-600', tooltip: "What gets sent back: status code and JSON body, e.g. 200 with {status:'ok'}." },
         { type: 'state', label: 'State', icon: Database, desc: 'Store data', gradient: 'from-cyan-500 to-blue-600', tooltip: 'Remember something between separate requests, e.g. a counter that increments each call.' },
         { type: 'conditional', label: 'Conditional', icon: GitBranch, desc: 'If/else logic', gradient: 'from-fuchsia-500 to-pink-600', tooltip: "Branch the flow, e.g. respond 401 if the request has no token." },
     ];
@@ -21,14 +21,14 @@ export default function Sidebar() {
     };
 
     return (
-        <div className="w-64 bg-[#0d1024]/90 backdrop-blur-2xl border-r border-indigo-500/10 flex flex-col">
+        <div className="w-64 bg-[#0b0b0d] backdrop-blur-2xl border-r border-white/10 flex flex-col">
             {/* Header */}
-            <div className="px-5 py-5 border-b border-indigo-500/10">
+            <div className="px-5 py-5 border-b border-white/10">
                 <div className="flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-violet-400" />
-                    <h2 className="font-semibold text-sm bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-transparent">Node Library</h2>
+                    <h2 className="font-semibold text-sm text-white">Node Library</h2>
                 </div>
-                <p className="text-xs text-indigo-300/50 mt-1">Drag to canvas</p>
+                <p className="text-xs text-white/35 mt-1">Drag to canvas</p>
             </div>
 
             {/* Node List */}
@@ -41,7 +41,7 @@ export default function Sidebar() {
                                 <Tooltip key={node.type}>
                                     <TooltipTrigger asChild>
                                         <div
-                                            className="group p-4 rounded-xl bg-zinc-800/50 border border-zinc-700/50 hover:border-violet-500/50 cursor-grab active:cursor-grabbing transition-all duration-300 hover:shadow-lg hover:shadow-violet-500/10 hover:translate-x-1"
+                                            className="group p-4 rounded-xl bg-[#111114] border border-white/10 hover:border-violet-500/40 cursor-grab active:cursor-grabbing transition-all duration-300 hover:translate-x-1"
                                             draggable
                                             onDragStart={(event) => onDragStart(event, node.type)}
                                         >
@@ -53,7 +53,7 @@ export default function Sidebar() {
                                                     <span className="text-sm font-semibold text-white block">
                                                         {node.label}
                                                     </span>
-                                                    <span className="text-xs text-zinc-500">
+                                                    <span className="text-xs text-white/35">
                                                         {node.desc}
                                                     </span>
                                                 </div>
@@ -71,8 +71,8 @@ export default function Sidebar() {
             </ScrollArea>
 
             {/* Footer hint */}
-            <div className="px-4 py-4 border-t border-white/[0.08]">
-                <div className="bg-gradient-to-r from-violet-500/10 to-indigo-500/10 border border-violet-500/20 rounded-lg p-3">
+            <div className="px-4 py-4 border-t border-white/10">
+                <div className="bg-violet-500/10 border border-violet-500/20 rounded-lg p-3">
                     <p className="text-xs text-violet-300">
                         💡 <span className="font-medium">Tip:</span> Connect nodes by dragging from edges
                     </p>

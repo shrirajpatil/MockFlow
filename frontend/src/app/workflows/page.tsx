@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, FileJson, Clock, Rocket, Trash2, Edit, Copy, ArrowLeft } from 'lucide-react';
+import { Plus, FileJson, Clock, Rocket, Trash2, Edit, Copy, ArrowLeft, Share2, CheckCircle2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { getOrCreateWorkspace, shortLabel } from '@/lib/workspace';
 import { useToast } from '@/hooks/use-toast';
@@ -39,6 +39,7 @@ export default function WorkflowsPage() {
     const [workflows, setWorkflows] = useState<Workflow[]>([]);
     const [loading, setLoading] = useState(true);
     const [workspace, setWorkspace] = useState<string | null>(null);
+    const [copiedShareId, setCopiedShareId] = useState<string | null>(null);
 
     useEffect(() => {
         const ws = getOrCreateWorkspace();
@@ -96,6 +97,13 @@ export default function WorkflowsPage() {
         }
     };
 
+    const copyShareLink = (workflow: Workflow) => {
+        const url = `${window.location.origin}/share?id=${workflow.id}`;
+        navigator.clipboard.writeText(url);
+        setCopiedShareId(workflow.id);
+        setTimeout(() => setCopiedShareId(null), 2000);
+    };
+
     const duplicateWorkflow = async (workflow: Workflow) => {
         try {
             const { error } = await supabase
@@ -127,22 +135,22 @@ export default function WorkflowsPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[#0a0d1a] text-white">
+        <div className="min-h-screen bg-[#0b0b0d] text-white">
             {/* Header */}
-            <div className="border-b border-indigo-500/10 bg-[#0a0d1a]/90 backdrop-blur-xl sticky top-0 z-10">
+            <div className="hairline-b border-b bg-[#0b0b0d]/90 backdrop-blur-xl sticky top-0 z-10">
                 <div className="max-w-7xl mx-auto px-6 py-6">
                     <div className="flex items-center justify-between flex-wrap gap-4">
                         <div>
-                            <Link href="/" className="inline-flex items-center gap-1.5 text-xs text-indigo-300/50 hover:text-indigo-200 transition-colors mb-3">
+                            <Link href="/" className="inline-flex items-center gap-1.5 text-xs text-white/40 hover:text-white transition-colors mb-3">
                                 <ArrowLeft className="w-3.5 h-3.5" />
                                 Back to home
                             </Link>
-                            <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-indigo-200 bg-clip-text text-transparent">
+                            <h1 className="text-2xl font-semibold text-white tracking-tight">
                                 My Workflows
                             </h1>
-                            <p className="text-indigo-200/50 mt-1">
+                            <p className="text-white/40 mt-1 text-sm">
                                 {workspace ? (
-                                    <>Workspace: <span className="font-mono text-indigo-300">{shortLabel(workspace)}...</span></>
+                                    <>Workspace: <span className="font-mono text-white/60">{shortLabel(workspace)}...</span></>
                                 ) : (
                                     'Manage and organize your API workflows'
                                 )}
@@ -150,7 +158,7 @@ export default function WorkflowsPage() {
                         </div>
                         <Button
                             onClick={() => router.push('/editor')}
-                            className="bg-gradient-to-r from-violet-600 via-indigo-600 to-violet-600 hover:from-violet-500 hover:via-indigo-500 hover:to-violet-500 border-0 shadow-lg shadow-indigo-500/20"
+                            className="bg-violet-500 hover:bg-violet-400 text-[#0b0b0d] border-0"
                         >
                             <Plus className="w-4 h-4 mr-2" />
                             New Workflow
@@ -163,32 +171,32 @@ export default function WorkflowsPage() {
             <div className="max-w-7xl mx-auto px-6 py-8">
                 {loading ? (
                     <div className="flex items-center justify-center py-20">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-400"></div>
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-400"></div>
                     </div>
                 ) : !workspace ? (
                     <div className="text-center py-20">
-                        <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-violet-500/10 border border-indigo-500/20 flex items-center justify-center mx-auto mb-6">
-                            <FileJson className="w-10 h-10 text-indigo-300/60" />
+                        <div className="w-16 h-16 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center mx-auto mb-6">
+                            <FileJson className="w-8 h-8 text-violet-400" />
                         </div>
-                        <h3 className="text-xl font-semibold text-white mb-2">No workspace set</h3>
-                        <p className="text-indigo-200/50 mb-6">Open the editor to set up your workspace first</p>
+                        <h3 className="text-lg font-semibold text-white mb-2">No workspace set</h3>
+                        <p className="text-white/40 mb-6 text-sm">Open the editor to set up your workspace first</p>
                         <Button
                             onClick={() => router.push('/editor')}
-                            className="bg-gradient-to-r from-violet-600 via-indigo-600 to-violet-600 hover:from-violet-500 hover:via-indigo-500 hover:to-violet-500 border-0"
+                            className="bg-violet-500 hover:bg-violet-400 text-[#0b0b0d] border-0"
                         >
                             Open Editor
                         </Button>
                     </div>
                 ) : workflows.length === 0 ? (
                     <div className="text-center py-20">
-                        <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-violet-500/10 border border-indigo-500/20 flex items-center justify-center mx-auto mb-6">
-                            <FileJson className="w-10 h-10 text-indigo-300/60" />
+                        <div className="w-16 h-16 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center mx-auto mb-6">
+                            <FileJson className="w-8 h-8 text-violet-400" />
                         </div>
-                        <h3 className="text-xl font-semibold text-white mb-2">No workflows yet</h3>
-                        <p className="text-indigo-200/50 mb-6">Create your first workflow to get started</p>
+                        <h3 className="text-lg font-semibold text-white mb-2">No workflows yet</h3>
+                        <p className="text-white/40 mb-6 text-sm">Create your first workflow to get started</p>
                         <Button
                             onClick={() => router.push('/editor')}
-                            className="bg-gradient-to-r from-violet-600 via-indigo-600 to-violet-600 hover:from-violet-500 hover:via-indigo-500 hover:to-violet-500 border-0"
+                            className="bg-violet-500 hover:bg-violet-400 text-[#0b0b0d] border-0"
                         >
                             <Plus className="w-4 h-4 mr-2" />
                             Create Workflow
@@ -201,12 +209,12 @@ export default function WorkflowsPage() {
                             return (
                                 <Card
                                     key={workflow.id}
-                                    className="group bg-[#0d1024]/60 border-indigo-500/10 hover:border-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-200 backdrop-blur-sm"
+                                    className="group surface-card"
                                 >
                                     <CardHeader>
                                         <div className="flex items-start justify-between">
                                             <div className="flex-1">
-                                                <CardTitle className="text-lg flex items-center gap-2 text-white">
+                                                <CardTitle className="text-base flex items-center gap-2 text-white">
                                                     {workflow.name}
                                                     {workflow.deployed && (
                                                         <span className="px-2 py-0.5 text-xs rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
@@ -215,7 +223,7 @@ export default function WorkflowsPage() {
                                                         </span>
                                                     )}
                                                 </CardTitle>
-                                                <CardDescription className="mt-1 line-clamp-2 text-indigo-200/50">
+                                                <CardDescription className="mt-1 line-clamp-2 text-white/40">
                                                     {workflow.description || 'No description'}
                                                 </CardDescription>
                                             </div>
@@ -223,26 +231,26 @@ export default function WorkflowsPage() {
                                     </CardHeader>
                                     <CardContent>
                                         <div className="space-y-3">
-                                            <div className="flex items-center gap-2 text-sm text-indigo-200/60">
-                                                <span className="px-2 py-1 rounded bg-indigo-500/10 text-indigo-300 font-mono text-xs border border-indigo-500/20">
+                                            <div className="flex items-center gap-2 text-sm text-white/50">
+                                                <span className="px-2 py-1 rounded surface-raised text-violet-300 font-mono text-xs">
                                                     {endpoint.method}
                                                 </span>
-                                                <span className="font-mono text-xs text-indigo-200/40 truncate">
+                                                <span className="font-mono text-xs text-white/35 truncate">
                                                     {endpoint.path}
                                                 </span>
                                             </div>
 
-                                            <div className="flex items-center gap-2 text-xs text-indigo-200/40">
+                                            <div className="flex items-center gap-2 text-xs text-white/35">
                                                 <Clock className="w-3 h-3" />
                                                 <span>Updated {new Date(workflow.updated_at).toLocaleDateString()}</span>
                                             </div>
 
-                                            <div className="flex items-center gap-2 pt-3 border-t border-indigo-500/10">
+                                            <div className="flex items-center gap-2 pt-3 hairline-t border-t">
                                                 <Button
                                                     variant="outline"
                                                     size="sm"
                                                     onClick={() => router.push(`/editor?id=${workflow.id}`)}
-                                                    className="flex-1 border-indigo-500/20 bg-transparent hover:bg-indigo-500/10 hover:text-indigo-200 hover:border-indigo-500/40"
+                                                    className="flex-1 border-white/10 bg-transparent hover:bg-violet-500/10 hover:text-violet-300 hover:border-violet-500/30"
                                                 >
                                                     <Edit className="w-3 h-3 mr-1" />
                                                     Edit
@@ -251,15 +259,26 @@ export default function WorkflowsPage() {
                                                     variant="outline"
                                                     size="sm"
                                                     onClick={() => duplicateWorkflow(workflow)}
-                                                    className="border-indigo-500/20 bg-transparent hover:bg-violet-500/10 hover:text-violet-300 hover:border-violet-500/40"
+                                                    className="border-white/10 bg-transparent hover:bg-violet-500/10 hover:text-violet-300 hover:border-violet-500/30"
                                                 >
                                                     <Copy className="w-3 h-3" />
                                                 </Button>
+                                                {workflow.deployed && (
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => copyShareLink(workflow)}
+                                                        title="Copy public read-only docs link"
+                                                        className="border-white/10 bg-transparent hover:bg-emerald-500/10 hover:text-emerald-300 hover:border-emerald-500/30"
+                                                    >
+                                                        {copiedShareId === workflow.id ? <CheckCircle2 className="w-3 h-3 text-emerald-400" /> : <Share2 className="w-3 h-3" />}
+                                                    </Button>
+                                                )}
                                                 <Button
                                                     variant="outline"
                                                     size="sm"
                                                     onClick={() => deleteWorkflow(workflow.id)}
-                                                    className="border-indigo-500/20 bg-transparent hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/40"
+                                                    className="border-white/10 bg-transparent hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/30"
                                                 >
                                                     <Trash2 className="w-3 h-3" />
                                                 </Button>

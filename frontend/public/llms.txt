@@ -1,0 +1,24 @@
+# MockFlow
+
+> MockFlow is a free, visual, node-based workflow builder for creating, testing, and deploying mock HTTP APIs. Build an endpoint by connecting nodes on a canvas, test it in the browser, and deploy it to a live public URL, without writing server code.
+
+## What it is
+
+MockFlow lets a developer stand up a realistic mock API in minutes. Instead of writing backend code, a user drags nodes onto a canvas and wires them together into a workflow. Each workflow maps to one HTTP endpoint (a method and a path). MockFlow is aimed at frontend developers who are blocked waiting on a real backend, QA engineers who need to simulate edge cases and failures, and anyone building a demo or prototype that needs a believable API without real infrastructure.
+
+## Key facts
+
+- Visual, drag-and-drop workflow editor built on a node canvas (no code required).
+- Six node types: Request (defines the method and path), Validation (rejects bad input with a 400 response), Transformation (reshapes data for later steps), Conditional (branches the workflow with a safe expression evaluator), State (persists a value across separate requests, backed by Redis), and Response (the status code and JSON body returned to the caller).
+- One-click deploy: a saved workflow becomes a live HTTP endpoint at `https://mockito.netlify.app/api/{workspace}/{path}`, callable with `curl` or any HTTP client.
+- Free to use, no account or signup required. A "workspace" is an anonymous namespace generated automatically in the browser.
+- Response bodies support `{{path}}` templating to insert dynamic values, including `{{request.body.x}}` (data from the incoming request), `{{state.x}}` (a value saved by a State node), `{{variables.x}}` (a value set by a Transformation node), and `{{fake.x}}` (generated fake data, e.g. `{{fake.name}}`, `{{fake.email}}`, `{{fake.uuid}}`).
+- Chaos mode: a Response node can be configured to randomly delay or fail its response, to test how a frontend handles a slow or flaky real-world API.
+- Local API testing: MockFlow's cloud cannot reach `localhost` on a user's machine directly. The default connection method is a no-signup SSH tunnel (`localhost.run`); an optional ngrok-based agent is available for a persistent, auto-detected tunnel.
+- Built with Next.js, ReactFlow, Supabase, and Netlify Functions.
+
+## Pages
+
+- [Home](https://mockito.netlify.app/): product overview, features, how it works, use cases, and FAQ.
+- [Documentation](https://mockito.netlify.app/docs): quickstart, a reference for all six node types, templating syntax, deployment URL shape, and local API connection instructions.
+- [Use cases](https://mockito.netlify.app/use-cases): detailed scenarios for frontend development, QA and integration testing, demos and prototypes, and simulating third-party APIs.

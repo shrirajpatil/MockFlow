@@ -94,39 +94,55 @@
 
 :root,
 .dark {
-  /* MockFlow dark theme — unified across landing, dashboard, and editor */
-  --background: 226 39% 7%;
-  /* #0a0d1a */
-  --foreground: 226 60% 97%;
+  /* MockFlow "precision dark" theme — a near-neutral black rather than a
+     saturated navy, so surfaces read as a considered dev-tool UI (Vercel /
+     Linear / Railway territory) instead of a templated purple-gradient
+     landing page. Violet stays the ONE accent, used deliberately rather
+     than on every icon badge. */
+  --background: 240 8% 5%;
+  /* #0b0b0d */
+  --foreground: 210 20% 96%;
 
-  --card: 230 35% 10%;
-  --card-foreground: 226 60% 97%;
+  --card: 240 7% 9%;
+  --card-foreground: 210 20% 96%;
 
-  --popover: 228 33% 9%;
-  --popover-foreground: 226 60% 97%;
+  --popover: 240 8% 8%;
+  --popover-foreground: 210 20% 96%;
 
-  --primary: 262.1 83.3% 65%;
-  /* Violet 500 */
-  --primary-foreground: 226 60% 98%;
+  --primary: 255 92% 76%;
+  /* Violet 400 — brighter, single accent */
+  --primary-foreground: 240 10% 6%;
 
-  --secondary: 230 28% 16%;
-  --secondary-foreground: 226 60% 97%;
+  --secondary: 240 6% 15%;
+  --secondary-foreground: 210 20% 96%;
 
-  --muted: 230 28% 14%;
-  --muted-foreground: 226 20% 65%;
+  --muted: 240 6% 13%;
+  --muted-foreground: 220 9% 62%;
 
-  --accent: 258 60% 20%;
-  --accent-foreground: 226 60% 97%;
+  --accent: 255 60% 18%;
+  --accent-foreground: 210 20% 96%;
 
-  --destructive: 0 72% 55%;
-  --destructive-foreground: 226 60% 98%;
+  --destructive: 0 72% 58%;
+  --destructive-foreground: 210 20% 98%;
 
-  --border: 230 25% 20%;
-  --input: 230 25% 20%;
+  --border: 240 6% 18%;
+  --input: 240 6% 18%;
 
-  --ring: 262.1 83.3% 65%;
+  --ring: 255 92% 76%;
 
-  --radius: 0.75rem;
+  --radius: 0.625rem;
+
+  /* Surface tokens for the marketing/editor chrome (used directly in
+     className strings, not just via shadcn primitives) so every page pulls
+     from the same small palette instead of inventing new hex/opacity combos. */
+  --surface-0: #0b0b0d;
+  /* page background */
+  --surface-1: #111114;
+  /* raised card */
+  --surface-2: #17171b;
+  /* nested/hover surface */
+  --hairline: rgba(255, 255, 255, 0.08);
+  --hairline-strong: rgba(255, 255, 255, 0.14);
 }
 
 .light {
@@ -153,21 +169,48 @@
 }
 
 @layer utilities {
-  .glass-panel {
-    @apply bg-white/70 backdrop-blur-xl border border-white/40 shadow-sm;
+
+  /* Shared surface treatment — the single source of truth for "a card" across
+     the landing page, dashboard, and editor, so hover/border/radius behavior
+     stays consistent instead of every page inventing its own opacity combo. */
+  .surface-card {
+    background-color: var(--surface-1);
+    border: 1px solid var(--hairline);
+    border-radius: 0.875rem;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
   }
 
-  .glass-card {
-    @apply bg-white/50 backdrop-blur-md border border-white/30 hover:border-violet-200 transition-all duration-300 shadow-sm;
+  .surface-card:hover {
+    border-color: var(--hairline-strong);
   }
 
-  .text-glow {
-    text-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+  .surface-raised {
+    background-color: var(--surface-2);
+    border: 1px solid var(--hairline);
+    border-radius: 0.625rem;
   }
 
-  .bg-grid-white {
-    background-size: 40px 40px;
-    background-image: linear-gradient(to right, rgba(0, 0, 0, 0.03) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+  .hairline-border {
+    border-color: var(--hairline);
+  }
+
+  .hairline-t {
+    border-top: 1px solid var(--hairline);
+  }
+
+  .hairline-b {
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  /* One restrained ambient glow, used at most once per page (e.g. behind a
+     hero) — not layered three-deep the way a template landing page would. */
+  .ambient-glow {
+    background: radial-gradient(circle, rgba(167, 139, 250, 0.16) 0%, rgba(167, 139, 250, 0) 65%);
+  }
+
+  .bg-grid-faint {
+    background-size: 32px 32px;
+    background-image: linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
   }
 }

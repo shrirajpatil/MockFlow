@@ -14,10 +14,10 @@ const StateNode = ({ data, selected }: NodeProps<StateNodeData>) => {
         >
             <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                    <span className="px-1.5 py-0.5 rounded bg-slate-800 text-cyan-400 text-[10px] font-bold border border-slate-700 uppercase">
+                    <span className="px-1.5 py-0.5 rounded bg-black/20 text-cyan-400 text-[10px] font-bold border border-white/10 uppercase">
                         {data.operation || 'get'}
                     </span>
-                    <span className="text-slate-400 font-mono text-[10px] truncate">{data.key || 'state.key'}</span>
+                    <span className="text-white/45 font-mono text-[10px] truncate">{data.key || 'state.key'}</span>
                 </div>
             </div>
         </BaseNode>

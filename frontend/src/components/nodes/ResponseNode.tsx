@@ -21,7 +21,7 @@ const ResponseNode = ({ data, selected }: NodeProps<ResponseNodeData>) => {
                     <span className={`px-2 py-0.5 rounded border ${isSuccess ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-red-500/10 border-red-500/20 text-red-400'} font-bold text-[10px]`}>
                         {statusCode}
                     </span>
-                    <span className="text-slate-500 text-[10px]">
+                    <span className="text-white/35 text-[10px]">
                         {isSuccess ? 'Response Success' : 'Error Response'}
                     </span>
                 </div>

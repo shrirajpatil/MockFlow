@@ -26,29 +26,29 @@ const BaseNode = ({
                 <Handle
                     type="target"
                     position={Position.Top}
-                    className="!w-3 !h-3 !bg-slate-900 !border-2 !border-slate-700 !rounded-full !-top-1.5"
+                    className="!w-3 !h-3 !bg-[#111114] !border-2 !border-white/20 !rounded-full !-top-1.5"
                 />
             )}
             <div className={`
                 w-[280px] rounded-xl overflow-hidden transition-all duration-300
-                bg-slate-900/95 backdrop-blur-xl border border-slate-800
+                bg-[#111114] backdrop-blur-xl border border-white/10
                 shadow-2xl shadow-black/50
-                ${selected ? 'ring-2 ring-indigo-500 ring-offset-2 ring-offset-[#0a0d1a] scale-[1.02]' : ''}
-                group-hover:border-slate-600 group-hover:shadow-indigo-500/10
+                ${selected ? 'ring-2 ring-violet-400 ring-offset-2 ring-offset-[#0b0b0d] scale-[1.02]' : ''}
+                group-hover:border-white/20
             `}>
                 {/* Header Area */}
-                <div className="flex items-center gap-3 px-4 py-3 bg-slate-800/50 border-b border-slate-800/50">
+                <div className="flex items-center gap-3 px-4 py-3 bg-white/[0.02] border-b border-white/10">
                     <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${gradient} flex items-center justify-center shadow-lg`}>
                         {icon || <span className="text-white text-xs font-bold font-mono">N</span>}
                     </div>
                     <div className="flex flex-col">
-                        <span className="font-bold text-slate-100 text-sm tracking-tight">{label}</span>
-                        <span className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">Node Module</span>
+                        <span className="font-bold text-white text-sm tracking-tight">{label}</span>
+                        <span className="text-[10px] text-white/35 font-medium uppercase tracking-wider">Node Module</span>
                     </div>
                 </div>
 
                 {/* Body Content */}
-                <div className="p-4 bg-slate-900/20">
+                <div className="p-4 bg-transparent">
                     {children}
                 </div>
             </div>
@@ -56,7 +56,7 @@ const BaseNode = ({
                 <Handle
                     type="source"
                     position={Position.Bottom}
-                    className="!w-3 !h-3 !bg-slate-900 !border-2 !border-slate-700 !rounded-full !-bottom-1.5"
+                    className="!w-3 !h-3 !bg-[#111114] !border-2 !border-white/20 !rounded-full !-bottom-1.5"
                 />
             )}
         </div>

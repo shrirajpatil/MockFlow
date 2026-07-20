@@ -168,7 +168,7 @@ const EditorCanvasContent = () => {
     );
 };
 
-/** Shown only on a blank canvas — points new users at the ways to start. */
+/** Shown only on a blank canvas. Points new users at the ways to start. */
 const EmptyCanvasHint = () => {
     const { nodes, setNodes, setEdges } = useStore();
 
@@ -202,25 +202,25 @@ const EmptyCanvasHint = () => {
 
     return (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="pointer-events-auto text-center max-w-sm px-6 py-8 rounded-2xl bg-zinc-900/70 border border-white/10 backdrop-blur-sm">
-                <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 flex items-center justify-center">
-                    <MousePointerClick className="w-6 h-6 text-indigo-300" />
+            <div className="pointer-events-auto text-center max-w-sm px-6 py-8 rounded-2xl surface-card backdrop-blur-sm">
+                <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
+                    <MousePointerClick className="w-6 h-6 text-violet-400" />
                 </div>
                 <h3 className="text-white font-semibold text-sm mb-1.5">Your canvas is empty</h3>
-                <p className="text-zinc-400 text-xs leading-relaxed mb-4">
+                <p className="text-white/40 text-xs leading-relaxed mb-4">
                     Drag a node from the sidebar to start building, start from the smallest possible workflow, or load a working example.
                 </p>
                 <div className="flex flex-col gap-2">
                     <button
                         onClick={loadStarterTemplate}
-                        className="inline-flex items-center justify-center gap-1.5 text-xs font-medium text-white bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 rounded-lg px-3.5 py-2 transition-colors"
+                        className="inline-flex items-center justify-center gap-1.5 text-xs font-medium text-[#0b0b0d] bg-violet-500 hover:bg-violet-400 rounded-lg px-3.5 py-2 transition-colors"
                     >
                         <Sparkles className="w-3.5 h-3.5" />
                         Load an example workflow
                     </button>
                     <button
                         onClick={startWithBasics}
-                        className="inline-flex items-center justify-center gap-1.5 text-xs font-medium text-zinc-300 bg-transparent border border-white/10 hover:border-indigo-500/40 hover:text-white rounded-lg px-3.5 py-2 transition-colors"
+                        className="inline-flex items-center justify-center gap-1.5 text-xs font-medium text-white/60 bg-transparent border border-white/10 hover:border-violet-500/40 hover:text-white rounded-lg px-3.5 py-2 transition-colors"
                     >
                         <MousePointerClick className="w-3.5 h-3.5" />
                         Start with the basics (Request → Response)

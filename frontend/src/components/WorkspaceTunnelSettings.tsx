@@ -71,7 +71,7 @@ export default function WorkspaceTunnelSettings() {
                 <Tooltip>
                     <TooltipTrigger asChild>
                         <DialogTrigger asChild>
-                            <Button variant="ghost" size="sm" className="gap-2 text-zinc-300 hover:bg-zinc-800 hover:text-white">
+                            <Button variant="ghost" size="sm" className="gap-2 text-white/60 hover:bg-white/5 hover:text-white">
                                 {status.active ? (
                                     <Wifi className="w-4 h-4 text-emerald-400" />
                                 ) : (
@@ -82,7 +82,7 @@ export default function WorkspaceTunnelSettings() {
                         </DialogTrigger>
                     </TooltipTrigger>
                     <TooltipContent>
-                        <p>{status.active ? 'Local tunnel is connected' : 'Connect a local API — no account needed'}</p>
+                        <p>{status.active ? 'Local tunnel is connected' : 'Connect a local API, no account needed'}</p>
                     </TooltipContent>
                 </Tooltip>
             </TooltipProvider>
@@ -172,7 +172,7 @@ function SshTunnelSection() {
                 <h4 className="text-sm font-semibold text-white">No signup needed</h4>
             </div>
             <p className="text-xs text-muted-foreground -mt-2">
-                Uses the SSH client already on your computer (built into macOS, Linux, and Windows 10+) — no account, no install.
+                Uses the SSH client already on your computer (built into macOS, Linux, and Windows 10+). No account, no install.
             </p>
 
             <div className="space-y-2">
@@ -180,7 +180,7 @@ function SshTunnelSection() {
                 <Input
                     value={port}
                     onChange={(e) => setPort(e.target.value.replace(/[^0-9]/g, ''))}
-                    placeholder="e.g. 3001, 5000, 8080 — not MockFlow's own dev server"
+                    placeholder="e.g. 3001, 5000, 8080 (not MockFlow's own dev server)"
                     className="font-mono text-sm"
                     inputMode="numeric"
                 />
@@ -196,7 +196,7 @@ function SshTunnelSection() {
                 </div>
                 <p className="text-xs text-muted-foreground">
                     It prints a public URL like <code className="text-[11px]">https://abcd1234.localhost.run</code>. This tunnel
-                    can&apos;t be auto-detected — paste the URL below when you have it.
+                    can&apos;t be auto-detected, so paste the URL below when you have it.
                 </p>
             </div>
 
@@ -337,8 +337,8 @@ function NgrokFlow({
     return (
         <div className="mt-3 space-y-3">
             <p className="text-xs text-muted-foreground">
-                Runs a small agent on your machine that keeps a tunnel open and lets MockFlow detect it automatically —
-                worth it if you're testing often, but needs a free ngrok account.
+                Runs a small agent on your machine that keeps a tunnel open and lets MockFlow detect it automatically.
+                Worth it if you're testing often, but needs a free ngrok account.
             </p>
 
             {status.active && status.url && (
@@ -359,7 +359,7 @@ function NgrokFlow({
             )}
 
             <Step number={1} title="Get a free ngrok token" done={false}>
-                <p className="text-sm text-muted-foreground mb-2">Required — ngrok rejects unauthenticated tunnels.</p>
+                <p className="text-sm text-muted-foreground mb-2">Required: ngrok rejects unauthenticated tunnels.</p>
                 <a
                     href="https://dashboard.ngrok.com/get-started/your-authtoken"
                     target="_blank"
@@ -381,7 +381,7 @@ cd tunnel-agent{'\n'}npm install{'\n'}npm start
                         </span>
                     ) : (
                         <span className="text-muted-foreground flex items-center gap-1">
-                            <WifiOff className="w-3.5 h-3.5" /> Not detected yet — run the command above
+                            <WifiOff className="w-3.5 h-3.5" /> Not detected yet, run the command above
                         </span>
                     )}
                 </div>
@@ -403,7 +403,7 @@ cd tunnel-agent{'\n'}npm install{'\n'}npm start
                 </div>
 
                 {!status.reachable && (
-                    <p className="text-xs text-muted-foreground mt-2">Start the agent first (step 2) — this talks directly to it on your machine.</p>
+                    <p className="text-xs text-muted-foreground mt-2">Start the agent first (step 2). This talks directly to it on your machine.</p>
                 )}
 
                 {validate === 'checking' && (
@@ -413,13 +413,13 @@ cd tunnel-agent{'\n'}npm install{'\n'}npm start
                 )}
                 {validate === 'connected' && (
                     <p className="text-xs text-emerald-600 mt-2 flex items-center gap-1.5 font-medium">
-                        <CheckCircle2 className="w-3.5 h-3.5" /> Connected — your tunnel URL is shown above.
+                        <CheckCircle2 className="w-3.5 h-3.5" /> Connected. Your tunnel URL is shown above.
                     </p>
                 )}
                 {validate === 'saved-not-live' && (
                     <p className="text-xs text-amber-600 mt-2 flex items-center gap-1.5">
                         <AlertCircle className="w-3.5 h-3.5" />
-                        Token saved and it&apos;s still connecting — give it a few more seconds, or click Connect again.
+                        Token saved and it&apos;s still connecting. Give it a few more seconds, or click Connect again.
                     </p>
                 )}
                 {validate === 'unreachable' && saveError && (
@@ -432,7 +432,7 @@ cd tunnel-agent{'\n'}npm install{'\n'}npm start
             <div className="rounded-lg border bg-muted/50 p-3 flex gap-2.5">
                 <ShieldCheck className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
                 <p className="text-xs text-muted-foreground">
-                    This talks directly to the agent on <code className="text-[11px]">127.0.0.1</code> — your own machine.
+                    This talks directly to the agent on <code className="text-[11px]">127.0.0.1</code>, your own machine.
                     Your token is written to a local <code className="text-[11px]">.env</code> file and never sent to MockFlow&apos;s servers.
                 </p>
             </div>

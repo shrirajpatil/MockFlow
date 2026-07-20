@@ -41,8 +41,11 @@ const CORS_HEADERS = {
 function isOriginAllowed(origin: string | undefined): boolean {
     if (!origin) return false;
 
-    // In development, allow all localhost origins
-    if (process.env.NODE_ENV === 'development') {
+    // In development, allow all localhost origins. `netlify dev` doesn't set
+    // NODE_ENV=development itself, so also check NETLIFY_DEV (which it does
+    // set) — otherwise this branch silently never fires under `netlify dev`.
+    const isLocalDev = process.env.NETLIFY_DEV === 'true' || process.env.NODE_ENV === 'development';
+    if (isLocalDev) {
         return origin.includes('localhost') || origin.includes('127.0.0.1');
     }
 
@@ -68,33 +71,47 @@ function getCorsHeaders(origin: string | undefined): Record<string, string> {
 function isLocalURL(url: string): boolean {
     try {
         const urlObj = new URL(url);
-        return urlObj.hostname === 'localhost' ||
-            urlObj.hostname === '127.0.0.1' ||
-            urlObj.hostname.endsWith('.local');
+        const hostname = urlObj.hostname.toLowerCase();
+        return hostname === 'localhost' ||
+            hostname === '127.0.0.1' ||
+            hostname === '::1' ||
+            hostname === '[::1]' ||
+            hostname.endsWith('.local');
     } catch {
         return false;
     }
 }
 
 /**
- * SSRF guard: reject URLs whose hostname is a literal private/reserved IP.
- * (Hostname-based check; a DNS-resolution check is a future hardening step.)
+ * SSRF guard: reject URLs whose hostname is a literal private/reserved IP
+ * (IPv4 and IPv6). Hostname-based check only — a DNS-resolution check
+ * (rejecting a hostname that *resolves* to a private IP) is a future
+ * hardening step.
  */
 function isPrivateAddress(url: string): boolean {
     try {
         const { hostname } = new URL(url);
-        if (!/^\d{1,3}(\.\d{1,3}){3}$/.test(hostname)) return false;
 
-        const octets = hostname.split('.').map(Number);
-        const [a, b] = octets as [number, number, number, number];
-        return (
-            a === 10 ||
-            a === 127 ||
-            (a === 172 && b >= 16 && b <= 31) ||
-            (a === 192 && b === 168) ||
-            (a === 169 && b === 254) ||
-            a === 0
-        );
+        if (/^\d{1,3}(\.\d{1,3}){3}$/.test(hostname)) {
+            const octets = hostname.split('.').map(Number);
+            const [a, b] = octets as [number, number, number, number];
+            return (
+                a === 10 ||
+                a === 127 ||
+                (a === 172 && b >= 16 && b <= 31) ||
+                (a === 192 && b === 168) ||
+                (a === 169 && b === 254) ||
+                a === 0
+            );
+        }
+
+        // IPv6: loopback (::1), unique local (fc00::/7), and link-local (fe80::/10)
+        const h = hostname.replace(/^\[|\]$/g, '').toLowerCase();
+        if (h === '::1') return true;
+        if (/^f[cd][0-9a-f]{2}:/.test(h)) return true;
+        if (/^fe[89ab][0-9a-f]:/.test(h)) return true;
+
+        return false;
     } catch {
         return false;
     }
@@ -226,8 +243,12 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
             }
         }
 
-        // 3. Local and private URLs cannot be reached from deployed infrastructure
-        if (isLocalURL(config.url) || isPrivateAddress(config.url)) {
+        // 3. Local and private URLs cannot be reached from deployed infrastructure.
+        // When this function runs locally (netlify dev), it's on the same
+        // machine as the target, so localhost really is reachable here and
+        // this guard would only block a legitimate local workflow.
+        const isLocalDev = process.env.NETLIFY_DEV === 'true' || process.env.NODE_ENV === 'development';
+        if (!isLocalDev && (isLocalURL(config.url) || isPrivateAddress(config.url))) {
             return {
                 statusCode: 400,
                 headers: {
@@ -236,7 +257,7 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
                 },
                 body: JSON.stringify({
                     error: 'Cannot reach local/private addresses',
-                    message: 'This proxy runs in the cloud and cannot reach your machine. To test a local API, expose it with the tunnel-agent CLI (npm start in tunnel-agent/) and use the public ngrok URL in your Request node.',
+                    message: 'This proxy runs in the cloud and cannot reach your machine. To test a local API, click Local APIs in the toolbar to connect one with a no-signup SSH tunnel.',
                 }),
             };
         }
@@ -249,6 +270,11 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
             data: config.body,
             timeout: config.timeout || 30000,
             validateStatus: () => true,
+            // Don't auto-follow redirects: the URL was validated against the
+            // SSRF guards above, but a redirect target isn't — following it
+            // would let an external URL bounce this server-side proxy into a
+            // private address. The caller sees the 3xx and can decide.
+            maxRedirects: 0,
         };
 
         if (config.auth) {
