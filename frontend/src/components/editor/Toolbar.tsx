@@ -13,6 +13,7 @@ import { getOrCreateWorkspace, restoreWorkspace, shortLabel } from '@/lib/worksp
 import { useToast } from '@/hooks/use-toast';
 import { WorkflowExecution } from '@/lib/supabase';
 import WorkspaceTunnelSettings from '@/components/WorkspaceTunnelSettings';
+import PanicButton from '@/components/editor/PanicButton';
 import {
     Dialog,
     DialogContent,
@@ -693,6 +694,10 @@ export default function Toolbar() {
                             </TooltipTrigger>
                             <TooltipContent>Clear canvas</TooltipContent>
                         </Tooltip>
+
+                        <div className="w-px h-6 bg-zinc-700 mx-1" />
+
+                        <PanicButton />
 
                         <div className="w-px h-6 bg-zinc-700 mx-1" />
 

@@ -40,6 +40,37 @@
   --animate-blob: blob 7s infinite;
   --animate-pulse-slow: pulse-slow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   --animate-fade-in-up: fade-in-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-panic-shake: panic-shake 2.2s ease-in-out infinite;
+
+  @keyframes panic-shake {
+    0%, 92%, 100% {
+      transform: translate(0, 0) rotate(0deg);
+    }
+
+    93% {
+      transform: translate(-1.5px, 0.5px) rotate(-1.5deg);
+    }
+
+    94% {
+      transform: translate(1.5px, -0.5px) rotate(1.5deg);
+    }
+
+    95% {
+      transform: translate(-1.5px, 0.5px) rotate(-1deg);
+    }
+
+    96% {
+      transform: translate(1.5px, 0.5px) rotate(1deg);
+    }
+
+    97% {
+      transform: translate(-1px, -0.5px) rotate(-0.5deg);
+    }
+
+    98% {
+      transform: translate(1px, 0.5px) rotate(0.5deg);
+    }
+  }
 
   @keyframes fade-in-up {
     from {
