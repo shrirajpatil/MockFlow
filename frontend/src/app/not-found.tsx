@@ -8,7 +8,7 @@ export default function NotFound() {
             <SiteHeader />
             <main className="flex-1 flex items-center justify-center px-6 py-24 text-center">
                 <div>
-                    <p className="text-sm font-mono text-violet-400 mb-4">404</p>
+                    <p className="text-sm font-mono text-indigo-400 mb-4">404</p>
                     <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-white mb-3">
                         Page not found
                     </h1>
@@ -17,7 +17,7 @@ export default function NotFound() {
                     </p>
                     <Link
                         href="/"
-                        className="inline-flex h-10 items-center px-6 rounded-lg bg-violet-500 hover:bg-violet-400 text-[#0b0b0d] font-medium text-sm transition-colors"
+                        className="inline-flex h-10 items-center px-6 rounded-lg bg-indigo-500 hover:bg-indigo-400 text-[#0b0b0d] font-medium text-sm transition-colors"
                     >
                         Back to home
                     </Link>

@@ -28,7 +28,7 @@ export default function EditorPage() {
     if (!mounted) {
         return (
             <div className="h-screen w-screen bg-[#0b0b0d] flex items-center justify-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-400"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-400"></div>
             </div>
         );
     }

@@ -158,7 +158,7 @@ export default function WorkflowsPage() {
                         </div>
                         <Button
                             onClick={() => router.push('/editor')}
-                            className="bg-violet-500 hover:bg-violet-400 text-[#0b0b0d] border-0"
+                            className="bg-indigo-500 hover:bg-indigo-400 text-[#0b0b0d] border-0"
                         >
                             <Plus className="w-4 h-4 mr-2" />
                             New Workflow
@@ -171,32 +171,32 @@ export default function WorkflowsPage() {
             <div className="max-w-7xl mx-auto px-6 py-8">
                 {loading ? (
                     <div className="flex items-center justify-center py-20">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-400"></div>
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-400"></div>
                     </div>
                 ) : !workspace ? (
                     <div className="text-center py-20">
-                        <div className="w-16 h-16 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center mx-auto mb-6">
-                            <FileJson className="w-8 h-8 text-violet-400" />
+                        <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mx-auto mb-6">
+                            <FileJson className="w-8 h-8 text-indigo-400" />
                         </div>
                         <h3 className="text-lg font-semibold text-white mb-2">No workspace set</h3>
                         <p className="text-white/40 mb-6 text-sm">Open the editor to set up your workspace first</p>
                         <Button
                             onClick={() => router.push('/editor')}
-                            className="bg-violet-500 hover:bg-violet-400 text-[#0b0b0d] border-0"
+                            className="bg-indigo-500 hover:bg-indigo-400 text-[#0b0b0d] border-0"
                         >
                             Open Editor
                         </Button>
                     </div>
                 ) : workflows.length === 0 ? (
                     <div className="text-center py-20">
-                        <div className="w-16 h-16 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center mx-auto mb-6">
-                            <FileJson className="w-8 h-8 text-violet-400" />
+                        <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mx-auto mb-6">
+                            <FileJson className="w-8 h-8 text-indigo-400" />
                         </div>
                         <h3 className="text-lg font-semibold text-white mb-2">No workflows yet</h3>
                         <p className="text-white/40 mb-6 text-sm">Create your first workflow to get started</p>
                         <Button
                             onClick={() => router.push('/editor')}
-                            className="bg-violet-500 hover:bg-violet-400 text-[#0b0b0d] border-0"
+                            className="bg-indigo-500 hover:bg-indigo-400 text-[#0b0b0d] border-0"
                         >
                             <Plus className="w-4 h-4 mr-2" />
                             Create Workflow
@@ -232,7 +232,7 @@ export default function WorkflowsPage() {
                                     <CardContent>
                                         <div className="space-y-3">
                                             <div className="flex items-center gap-2 text-sm text-white/50">
-                                                <span className="px-2 py-1 rounded surface-raised text-violet-300 font-mono text-xs">
+                                                <span className="px-2 py-1 rounded surface-raised text-indigo-300 font-mono text-xs">
                                                     {endpoint.method}
                                                 </span>
                                                 <span className="font-mono text-xs text-white/35 truncate">
@@ -250,7 +250,7 @@ export default function WorkflowsPage() {
                                                     variant="outline"
                                                     size="sm"
                                                     onClick={() => router.push(`/editor?id=${workflow.id}`)}
-                                                    className="flex-1 border-white/10 bg-transparent hover:bg-violet-500/10 hover:text-violet-300 hover:border-violet-500/30"
+                                                    className="flex-1 border-white/10 bg-transparent hover:bg-indigo-500/10 hover:text-indigo-300 hover:border-indigo-500/30"
                                                 >
                                                     <Edit className="w-3 h-3 mr-1" />
                                                     Edit
@@ -259,7 +259,7 @@ export default function WorkflowsPage() {
                                                     variant="outline"
                                                     size="sm"
                                                     onClick={() => duplicateWorkflow(workflow)}
-                                                    className="border-white/10 bg-transparent hover:bg-violet-500/10 hover:text-violet-300 hover:border-violet-500/30"
+                                                    className="border-white/10 bg-transparent hover:bg-indigo-500/10 hover:text-indigo-300 hover:border-indigo-500/30"
                                                 >
                                                     <Copy className="w-3 h-3" />
                                                 </Button>

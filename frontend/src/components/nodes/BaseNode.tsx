@@ -18,7 +18,7 @@ const BaseNode = ({
     showSourceHandle = true,
     showTargetHandle = true,
     icon,
-    gradient = 'from-indigo-500 to-violet-500'
+    gradient = 'from-indigo-500 to-blue-600'
 }: BaseNodeProps) => {
     return (
         <div className="relative group">
@@ -33,7 +33,7 @@ const BaseNode = ({
                 w-[280px] rounded-xl overflow-hidden transition-all duration-300
                 bg-[#111114] backdrop-blur-xl border border-white/10
                 shadow-2xl shadow-black/50
-                ${selected ? 'ring-2 ring-violet-400 ring-offset-2 ring-offset-[#0b0b0d] scale-[1.02]' : ''}
+                ${selected ? 'ring-2 ring-indigo-400 ring-offset-2 ring-offset-[#0b0b0d] scale-[1.02]' : ''}
                 group-hover:border-white/20
             `}>
                 {/* Header Area */}

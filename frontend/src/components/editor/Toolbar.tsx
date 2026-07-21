@@ -512,7 +512,7 @@ export default function Toolbar() {
             <div className="h-14 flex items-center justify-between px-6 bg-[#0b0b0d]/95 backdrop-blur-xl hairline-b border-b z-50 relative sticky top-0">
                 <div className="flex items-center gap-5">
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-violet-500 flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-lg bg-indigo-500 flex items-center justify-center">
                             <Zap className="w-4 h-4 text-[#0b0b0d]" />
                         </div>
                         <div>
@@ -528,12 +528,12 @@ export default function Toolbar() {
                     <div className="hidden md:flex items-center gap-2 text-xs">
                         <div className="flex items-center gap-2 px-3 py-1.5 rounded-full surface-raised text-white/60">
                             <span className="flex items-center gap-1.5">
-                                <span className={`w-1.5 h-1.5 rounded-full ${nodeCount > 0 ? 'bg-violet-400' : 'bg-white/20'}`}></span>
+                                <span className={`w-1.5 h-1.5 rounded-full ${nodeCount > 0 ? 'bg-indigo-400' : 'bg-white/20'}`}></span>
                                 {nodeCount} Nodes
                             </span>
                             <span className="w-px h-3 bg-white/10"></span>
                             <span className="flex items-center gap-1.5">
-                                <span className={`w-1.5 h-1.5 rounded-full ${edgeCount > 0 ? 'bg-violet-400' : 'bg-white/20'}`}></span>
+                                <span className={`w-1.5 h-1.5 rounded-full ${edgeCount > 0 ? 'bg-indigo-400' : 'bg-white/20'}`}></span>
                                 {edgeCount} Edges
                             </span>
                         </div>
@@ -541,7 +541,7 @@ export default function Toolbar() {
                         {workspace && (
                             <button
                                 onClick={() => setWorkspaceDialogOpen(true)}
-                                className="px-3 py-1.5 rounded-full bg-violet-500/10 text-violet-300 border border-violet-500/20 flex items-center gap-2 hover:bg-violet-500/15 transition-colors font-mono"
+                                className="px-3 py-1.5 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 flex items-center gap-2 hover:bg-indigo-500/15 transition-colors font-mono"
                                 title="View or restore your workspace"
                             >
                                 <Database className="w-3 h-3" /> {shortLabel(workspace)}
@@ -620,7 +620,7 @@ export default function Toolbar() {
                                     disabled={!workflowId || deploying}
                                     className={isDeployed
                                         ? "bg-emerald-500 hover:bg-emerald-400 text-[#0b0b0d] border-0"
-                                        : "bg-violet-500 hover:bg-violet-400 text-[#0b0b0d] border-0"
+                                        : "bg-indigo-500 hover:bg-indigo-400 text-[#0b0b0d] border-0"
                                     }
                                 >
                                     {isDeployed ? <CheckCircle2 className="w-4 h-4 mr-2" /> : <Rocket className="w-4 h-4 mr-2" />}
@@ -677,7 +677,7 @@ export default function Toolbar() {
 
                         <Tooltip>
                             <TooltipTrigger asChild>
-                                <Button variant="outline" className="border-violet-500/30 text-violet-300 hover:bg-violet-500/10 hover:text-violet-200" size="sm" onClick={() => setTestDialogOpen(true)}>
+                                <Button variant="outline" className="border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/10 hover:text-indigo-200" size="sm" onClick={() => setTestDialogOpen(true)}>
                                     <Play className="w-4 h-4 mr-2" />
                                     Test
                                 </Button>
@@ -755,8 +755,8 @@ export default function Toolbar() {
                                         {workspaceCopied ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
                                     </Button>
                                 </div>
-                                <p className="text-xs text-violet-300">
-                                    Your endpoints look like: <code className="bg-violet-500/10 px-1 rounded">/api/{shortLabel(workspace)}.../...</code>
+                                <p className="text-xs text-indigo-300">
+                                    Your endpoints look like: <code className="bg-indigo-500/10 px-1 rounded">/api/{shortLabel(workspace)}.../...</code>
                                 </p>
                             </div>
 
@@ -802,7 +802,7 @@ export default function Toolbar() {
                                     Cancel
                                 </Button>
                                 <Button
-                                    className="flex-1 bg-violet-500 hover:bg-violet-400 text-[#0b0b0d] border-0"
+                                    className="flex-1 bg-indigo-500 hover:bg-indigo-400 text-[#0b0b0d] border-0"
                                     onClick={() => {
                                         const result = restoreWorkspace(restoreCode);
                                         if (!result.ok) {
@@ -825,7 +825,7 @@ export default function Toolbar() {
 
             {/* Save Workflow Dialog */}
             <Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}>
-                <DialogContent className="border-indigo-100">
+                <DialogContent className="border-indigo-500/20">
                     <DialogHeader>
                         <DialogTitle>Save Workflow</DialogTitle>
                         <DialogDescription>
@@ -840,7 +840,7 @@ export default function Toolbar() {
                                 value={workflowName}
                                 onChange={(e) => setWorkflowName(e.target.value)}
                                 placeholder="My API Workflow"
-                                className="border-indigo-200 focus:border-indigo-400 focus:ring-indigo-400"
+                                className="border-white/10 bg-transparent focus:border-indigo-500/50 focus:ring-indigo-500/20"
                             />
                         </div>
 
@@ -851,14 +851,14 @@ export default function Toolbar() {
                                 onChange={(e) => setWorkflowDescription(e.target.value)}
                                 placeholder="Describe what this workflow does..."
                                 rows={3}
-                                className="border-indigo-200 focus:border-indigo-400 focus:ring-indigo-400"
+                                className="border-white/10 bg-transparent focus:border-indigo-500/50 focus:ring-indigo-500/20"
                             />
                         </div>
 
                         <Button
                             onClick={handleSaveToDatabase}
                             disabled={!workflowName.trim() || saving}
-                            className="w-full bg-violet-500 hover:bg-violet-400 text-[#0b0b0d] border-0"
+                            className="w-full bg-indigo-500 hover:bg-indigo-400 text-[#0b0b0d] border-0"
                         >
                             {saving ? 'Saving...' : 'Save Workflow'}
                         </Button>
@@ -887,7 +887,7 @@ export default function Toolbar() {
                             />
                         </div>
 
-                        <Button onClick={handleTest} disabled={testing} className="w-full bg-violet-500 hover:bg-violet-400 text-[#0b0b0d] border-0">
+                        <Button onClick={handleTest} disabled={testing} className="w-full bg-indigo-500 hover:bg-indigo-400 text-[#0b0b0d] border-0">
                             {testing ? 'Testing...' : 'Run Test'}
                         </Button>
 
@@ -1056,7 +1056,7 @@ export default function Toolbar() {
                                     Upload file
                                 </Button>
                                 <Button
-                                    className="flex-1 bg-violet-500 hover:bg-violet-400 text-[#0b0b0d] border-0"
+                                    className="flex-1 bg-indigo-500 hover:bg-indigo-400 text-[#0b0b0d] border-0"
                                     onClick={() => parseImportText(importText)}
                                     disabled={!importText.trim()}
                                 >
@@ -1076,9 +1076,9 @@ export default function Toolbar() {
                                         <button
                                             key={op.key}
                                             onClick={() => toggleImportSelected(op.key)}
-                                            className={`w-full text-left flex items-center gap-3 p-2.5 rounded-lg border transition-colors ${selected ? 'border-violet-500/40 bg-violet-500/10' : 'border-white/10 hover:border-white/20'}`}
+                                            className={`w-full text-left flex items-center gap-3 p-2.5 rounded-lg border transition-colors ${selected ? 'border-indigo-500/40 bg-indigo-500/10' : 'border-white/10 hover:border-white/20'}`}
                                         >
-                                            <span className={`w-4 h-4 rounded flex items-center justify-center border shrink-0 ${selected ? 'bg-violet-500 border-violet-500' : 'border-white/20'}`}>
+                                            <span className={`w-4 h-4 rounded flex items-center justify-center border shrink-0 ${selected ? 'bg-indigo-500 border-indigo-500' : 'border-white/20'}`}>
                                                 {selected && <CheckCircle2 className="w-3 h-3 text-[#0b0b0d]" />}
                                             </span>
                                             <span className="px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300 font-bold text-[10px] border border-blue-500/20 shrink-0">
@@ -1097,7 +1097,7 @@ export default function Toolbar() {
                                     Back
                                 </Button>
                                 <Button
-                                    className="flex-1 bg-violet-500 hover:bg-violet-400 text-[#0b0b0d] border-0"
+                                    className="flex-1 bg-indigo-500 hover:bg-indigo-400 text-[#0b0b0d] border-0"
                                     onClick={handleImportConfirm}
                                     disabled={importing || importSelected.size === 0}
                                 >

@@ -37,8 +37,8 @@ const NodeConfigPanel = () => {
     if (!selectedNode || !nodeData) {
         return (
             <div className="w-80 bg-[#111114]/95 backdrop-blur-2xl border-l border-white/[0.08] flex flex-col items-center justify-center p-8 text-center">
-                <div className="w-16 h-16 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center mb-5">
-                    <Settings2 className="w-7 h-7 text-violet-400" />
+                <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mb-5">
+                    <Settings2 className="w-7 h-7 text-indigo-400" />
                 </div>
                 <h3 className="font-semibold text-white mb-2">No Selection</h3>
                 <p className="text-sm text-white/35">Click a node to configure</p>
@@ -51,7 +51,7 @@ const NodeConfigPanel = () => {
             {/* Header */}
             <div className="px-5 py-4 border-b border-white/[0.08] flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-violet-400" />
+                    <Sparkles className="w-4 h-4 text-indigo-400" />
                     <div>
                         <h2 className="font-semibold text-sm text-white">Configure</h2>
                         <p className="text-xs text-white/35 capitalize">{nodeData.type} Node</p>
@@ -93,8 +93,8 @@ const NodeConfigPanel = () => {
     );
 };
 
-const inputStyles = "h-10 text-sm bg-white/[0.04] border-white/10 text-white placeholder-white/30 focus:border-violet-500/50 focus:ring-violet-500/20 rounded-lg";
-const textareaStyles = "bg-white/[0.04] border-white/10 text-white placeholder-white/30 focus:border-violet-500/50 focus:ring-violet-500/20 font-mono text-xs rounded-lg";
+const inputStyles = "h-10 text-sm bg-white/[0.04] border-white/10 text-white placeholder-white/30 focus:border-indigo-500/50 focus:ring-indigo-500/20 rounded-lg";
+const textareaStyles = "bg-white/[0.04] border-white/10 text-white placeholder-white/30 focus:border-indigo-500/50 focus:ring-indigo-500/20 font-mono text-xs rounded-lg";
 const labelStyles = "text-xs text-white/40 font-medium";
 
 const RequestConfig = ({ data, updateData }: any) => {
@@ -129,9 +129,9 @@ const RequestConfig = ({ data, updateData }: any) => {
                 {isLocalhost ? (
                     <LocalhostHint />
                 ) : (
-                    <div className="bg-violet-500/10 border border-violet-500/20 rounded-lg p-3">
-                        <p className="text-xs text-violet-200">
-                            <span className="font-bold text-violet-300">TIP:</span> Enter full URL like <code className="bg-black/20 px-1 rounded">https://api.example.com/users</code> to call real APIs
+                    <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-lg p-3">
+                        <p className="text-xs text-indigo-200">
+                            <span className="font-bold text-indigo-300">TIP:</span> Enter full URL like <code className="bg-black/20 px-1 rounded">https://api.example.com/users</code> to call real APIs
                         </p>
                     </div>
                 )}
@@ -195,7 +195,7 @@ const ValidationConfig = ({ data, updateData }: any) => {
         <div className="space-y-4">
             <div className="flex items-center justify-between">
                 <Label className={labelStyles}>Validation Rules</Label>
-                <Button variant="ghost" size="sm" onClick={addRule} className="h-7 px-2 text-xs text-violet-400 hover:bg-violet-500/10">
+                <Button variant="ghost" size="sm" onClick={addRule} className="h-7 px-2 text-xs text-indigo-400 hover:bg-indigo-500/10">
                     <Plus className="w-3 h-3 mr-1" /> Add
                 </Button>
             </div>
@@ -210,7 +210,7 @@ const ValidationConfig = ({ data, updateData }: any) => {
             {rules.map((rule: any, idx: number) => (
                 <div key={idx} className="bg-white/[0.03] border border-white/10 rounded-xl p-4 space-y-3">
                     <div className="flex justify-between items-center">
-                        <span className="text-xs font-medium text-violet-400">Rule {idx + 1}</span>
+                        <span className="text-xs font-medium text-indigo-400">Rule {idx + 1}</span>
                         <Button variant="ghost" size="icon" onClick={() => removeRule(idx)} className="h-6 w-6 text-white/35 hover:text-red-400 hover:bg-red-500/10">
                             <Trash2 className="w-3 h-3" />
                         </Button>
@@ -265,7 +265,7 @@ const TransformationConfig = ({ data, updateData }: any) => {
         <div className="space-y-4">
             <div className="flex items-center justify-between">
                 <Label className={labelStyles}>Transformations</Label>
-                <Button variant="ghost" size="sm" onClick={addTransform} className="h-7 px-2 text-xs text-violet-400 hover:bg-violet-500/10">
+                <Button variant="ghost" size="sm" onClick={addTransform} className="h-7 px-2 text-xs text-indigo-400 hover:bg-indigo-500/10">
                     <Plus className="w-3 h-3 mr-1" /> Add
                 </Button>
             </div>
@@ -439,7 +439,7 @@ const FakeTokenChip = ({ token }: { token: string }) => {
             type="button"
             onClick={copy}
             title={`Copy ${value}`}
-            className="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-1 rounded-md bg-white/[0.04] border-white/10 text-white/60 hover:border-violet-500/50 hover:text-white transition-colors"
+            className="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-1 rounded-md bg-white/[0.04] border-white/10 text-white/60 hover:border-indigo-500/50 hover:text-white transition-colors"
         >
             {copied ? <Check className="w-2.5 h-2.5 text-emerald-400" /> : <Copy className="w-2.5 h-2.5" />}
             fake.{token}

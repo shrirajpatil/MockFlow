@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Workflow, Shield, Rocket, Terminal, ChevronRight, Sparkles, Inbox, Shuffle, Send, GitBranch, Layers, MousePointerClick, PlugZap, Users, Zap, Dices } from 'lucide-react';
+import { ArrowRight, Workflow, Shield, Rocket, Terminal, ChevronRight, Sparkles, GitBranch, Layers, MousePointerClick, PlugZap, Users, Zap, Dices } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import SiteHeader from '@/components/marketing/SiteHeader';
 import SiteFooter from '@/components/marketing/SiteFooter';
@@ -89,7 +89,7 @@ const InteractiveGrid = () => {
         ctx.beginPath();
         ctx.arc(dot.x, dot.y, near ? 1.4 + intensity * 1.2 : 1, 0, Math.PI * 2);
         ctx.fillStyle = near
-          ? `rgba(167, 139, 250, ${0.35 + intensity * 0.65})`
+          ? `rgba(129, 140, 248, ${0.35 + intensity * 0.65})`
           : 'rgba(255, 255, 255, 0.06)';
         ctx.fill();
       });
@@ -146,7 +146,7 @@ const USE_CASES = [
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-[#0b0b0d] text-white font-sans antialiased selection:bg-violet-500/30 overflow-x-hidden">
+    <div className="min-h-screen bg-[#0b0b0d] text-white font-sans antialiased selection:bg-indigo-500/30 overflow-x-hidden">
       <SiteHeader />
 
       {/* Hero */}
@@ -159,29 +159,39 @@ export default function LandingPage() {
         <div className="relative z-10 max-w-4xl mx-auto text-center pt-20 pb-16 px-6">
           <Link
             href="/editor"
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full hairline-border border text-xs font-medium text-white/70 hover:text-white hover:border-white/25 transition-colors mb-8"
+            style={{ animationDelay: '0ms' }}
+            className="animate-fade-in-up inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-highlight/25 bg-highlight/[0.07] text-xs font-medium text-white/70 hover:text-white hover:border-highlight/40 transition-colors mb-8"
           >
-            <Sparkles className="w-3.5 h-3.5 text-violet-400" />
+            <Sparkles className="w-3.5 h-3.5 text-highlight" />
             Now in beta, free while in beta
             <ChevronRight className="w-3.5 h-3.5 opacity-60" />
           </Link>
 
-          <h1 className="text-5xl sm:text-6xl lg:text-[4.5rem] font-semibold tracking-tight leading-[1.05] mb-6 text-white">
+          <h1
+            style={{ animationDelay: '80ms' }}
+            className="animate-fade-in-up text-5xl sm:text-6xl lg:text-[4.5rem] font-semibold tracking-tight leading-[1.05] mb-6 text-white"
+          >
             Build mock APIs,
             <br />
-            <span className="text-violet-400">visually.</span>
+            <span className="text-indigo-400">visually.</span>
           </h1>
 
-          <p className="text-lg text-white/50 max-w-xl mx-auto mb-10 leading-relaxed">
+          <p
+            style={{ animationDelay: '160ms' }}
+            className="animate-fade-in-up text-lg text-white/50 max-w-xl mx-auto mb-10 leading-relaxed"
+          >
             A free visual workflow builder for creating, testing, and deploying mock REST APIs.
             No backend code. A live HTTP endpoint in under a minute.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center mb-20">
+          <div
+            style={{ animationDelay: '240ms' }}
+            className="animate-fade-in-up flex flex-col sm:flex-row gap-3 justify-center items-center mb-20"
+          >
             <Link href="/editor">
               <Button
                 size="lg"
-                className="h-11 px-7 bg-violet-500 hover:bg-violet-400 text-[#0b0b0d] font-medium rounded-lg text-sm border-0 transition-colors"
+                className="h-11 px-7 bg-indigo-500 hover:bg-indigo-400 text-[#0b0b0d] font-medium rounded-lg text-sm border-0 transition-colors"
               >
                 Open the editor
                 <ArrowRight className="w-4 h-4 ml-1.5" />
@@ -197,7 +207,10 @@ export default function LandingPage() {
           </div>
 
           {/* Product Preview */}
-          <div className="relative mx-auto max-w-5xl">
+          <div
+            style={{ animationDelay: '320ms' }}
+            className="animate-fade-in-up relative mx-auto max-w-5xl"
+          >
             <div className="surface-card rounded-2xl overflow-hidden shadow-2xl shadow-black/40 text-left">
               <div className="flex items-center gap-2 px-4 h-10 hairline-b border-b bg-white/[0.02]">
                 <div className="flex gap-1.5">
@@ -210,30 +223,14 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              <div className="p-8 sm:p-10 min-h-[340px] bg-grid-faint relative flex items-center justify-center">
-                <div className="flex items-center justify-center gap-2 lg:gap-5 relative z-10 scale-[0.72] sm:scale-90 lg:scale-100">
-                  {[
-                    { icon: Inbox, label: 'Request', meta: 'GET /api/users' },
-                    { icon: Shuffle, label: 'Transform', meta: '2 steps active' },
-                    { icon: Send, label: 'Response', meta: '200 OK' },
-                  ].map((n, i) => (
-                    <div key={i} className="flex items-center gap-2 lg:gap-5">
-                      <div className="w-[168px] shrink-0 rounded-lg surface-raised overflow-hidden">
-                        <div className="flex items-center gap-2.5 px-3.5 py-3 hairline-b border-b">
-                          <div className="w-7 h-7 rounded-md bg-violet-500/15 border border-violet-500/25 flex items-center justify-center shrink-0">
-                            <n.icon className="w-3.5 h-3.5 text-violet-400" />
-                          </div>
-                          <span className="font-medium text-white text-xs">{n.label}</span>
-                        </div>
-                        <div className="px-3.5 py-2.5">
-                          <span className="text-white/40 font-mono text-[10px]">{n.meta}</span>
-                        </div>
-                      </div>
-                      {i < 2 && <div className="hidden md:block w-6 h-px bg-white/10 shrink-0" />}
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <video
+                src="/demo.mp4"
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full h-auto block bg-[#0c1020]"
+              />
             </div>
           </div>
         </div>
@@ -246,9 +243,9 @@ export default function LandingPage() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {FEATURES.map((f, i) => (
-              <div key={i} className="surface-card p-5 rounded-xl">
-                <div className="w-9 h-9 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center mb-4">
-                  <f.icon className="w-4.5 h-4.5 text-violet-400" />
+              <div key={i} className="surface-card p-5 rounded-xl transition-transform duration-300 hover:-translate-y-1">
+                <div className="w-9 h-9 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mb-4">
+                  <f.icon className="w-4.5 h-4.5 text-indigo-400" />
                 </div>
                 <h3 className="text-sm font-semibold text-white mb-1.5">{f.title}</h3>
                 <p className="text-[13px] text-white/45 leading-relaxed">{f.desc}</p>
@@ -265,10 +262,10 @@ export default function LandingPage() {
 
           <div className="grid md:grid-cols-3 gap-4">
             {STEPS.map((s, i) => (
-              <div key={i} className="relative surface-card p-6 rounded-xl">
+              <div key={i} className="relative surface-card p-6 rounded-xl transition-transform duration-300 hover:-translate-y-1">
                 <span className="absolute top-5 right-6 text-3xl font-semibold text-white/[0.06] tabular-nums">{s.step}</span>
-                <div className="w-9 h-9 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center mb-5">
-                  <s.icon className="w-4.5 h-4.5 text-violet-400" />
+                <div className="w-9 h-9 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mb-5">
+                  <s.icon className="w-4.5 h-4.5 text-indigo-400" />
                 </div>
                 <h3 className="text-base font-semibold text-white mb-2">{s.title}</h3>
                 <p className="text-sm text-white/45 leading-relaxed">{s.desc}</p>
@@ -285,9 +282,9 @@ export default function LandingPage() {
 
           <div className="grid md:grid-cols-2 gap-4">
             {USE_CASES.map((u, i) => (
-              <div key={i} className="flex items-start gap-4 surface-card p-5 rounded-xl">
-                <div className="w-9 h-9 shrink-0 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
-                  <u.icon className="w-4.5 h-4.5 text-violet-400" />
+              <div key={i} className="flex items-start gap-4 surface-card p-5 rounded-xl transition-transform duration-300 hover:-translate-y-1">
+                <div className="w-9 h-9 shrink-0 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
+                  <u.icon className="w-4.5 h-4.5 text-indigo-400" />
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold text-white mb-1">{u.title}</h3>
@@ -337,7 +334,7 @@ export default function LandingPage() {
           <Link href="/editor">
             <Button
               size="lg"
-              className="h-11 px-7 bg-violet-500 hover:bg-violet-400 text-[#0b0b0d] font-medium rounded-lg text-sm border-0 transition-colors"
+              className="h-11 px-7 bg-indigo-500 hover:bg-indigo-400 text-[#0b0b0d] font-medium rounded-lg text-sm border-0 transition-colors"
             >
               Open the editor
               <ArrowRight className="w-4 h-4 ml-1.5" />
@@ -360,7 +357,7 @@ export default function LandingPage() {
 function SectionHeading({ eyebrow, title, subtitle }: { eyebrow: string; title: string; subtitle?: string }) {
   return (
     <div className="text-center mb-12">
-      <span className="text-xs font-semibold text-violet-400 uppercase tracking-wider">{eyebrow}</span>
+      <span className="text-xs font-semibold text-indigo-400 uppercase tracking-wider">{eyebrow}</span>
       <h2 className="text-2xl sm:text-3xl font-semibold text-white mt-2 mb-3 tracking-tight">{title}</h2>
       {subtitle && <p className="text-white/45 max-w-md mx-auto text-[15px]">{subtitle}</p>}
     </div>

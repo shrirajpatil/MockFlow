@@ -203,8 +203,8 @@ const EmptyCanvasHint = () => {
     return (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div className="pointer-events-auto text-center max-w-sm px-6 py-8 rounded-2xl surface-card backdrop-blur-sm">
-                <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
-                    <MousePointerClick className="w-6 h-6 text-violet-400" />
+                <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
+                    <MousePointerClick className="w-6 h-6 text-indigo-400" />
                 </div>
                 <h3 className="text-white font-semibold text-sm mb-1.5">Your canvas is empty</h3>
                 <p className="text-white/40 text-xs leading-relaxed mb-4">
@@ -213,14 +213,14 @@ const EmptyCanvasHint = () => {
                 <div className="flex flex-col gap-2">
                     <button
                         onClick={loadStarterTemplate}
-                        className="inline-flex items-center justify-center gap-1.5 text-xs font-medium text-[#0b0b0d] bg-violet-500 hover:bg-violet-400 rounded-lg px-3.5 py-2 transition-colors"
+                        className="inline-flex items-center justify-center gap-1.5 text-xs font-medium text-[#0b0b0d] bg-indigo-500 hover:bg-indigo-400 rounded-lg px-3.5 py-2 transition-colors"
                     >
                         <Sparkles className="w-3.5 h-3.5" />
                         Load an example workflow
                     </button>
                     <button
                         onClick={startWithBasics}
-                        className="inline-flex items-center justify-center gap-1.5 text-xs font-medium text-white/60 bg-transparent border border-white/10 hover:border-violet-500/40 hover:text-white rounded-lg px-3.5 py-2 transition-colors"
+                        className="inline-flex items-center justify-center gap-1.5 text-xs font-medium text-white/60 bg-transparent border border-white/10 hover:border-indigo-500/40 hover:text-white rounded-lg px-3.5 py-2 transition-colors"
                     >
                         <MousePointerClick className="w-3.5 h-3.5" />
                         Start with the basics (Request → Response)

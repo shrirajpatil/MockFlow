@@ -8,7 +8,7 @@ export default function SiteHeader() {
             <nav className="flex items-center justify-between px-6 lg:px-12 h-16 max-w-7xl mx-auto">
                 <div className="flex items-center gap-8">
                     <Link href="/" className="flex items-center gap-2.5 group">
-                        <div className="w-8 h-8 rounded-lg bg-violet-500 flex items-center justify-center transition-transform group-hover:scale-105">
+                        <div className="w-8 h-8 rounded-lg bg-indigo-500 flex items-center justify-center transition-transform group-hover:scale-105">
                             <Zap className="w-4 h-4 text-[#0b0b0d]" />
                         </div>
                         <span className="font-semibold text-[15px] text-white">MockFlow</span>
@@ -31,7 +31,7 @@ export default function SiteHeader() {
                         <span>Shriraj</span>
                     </Link>
                     <Link href="/editor">
-                        <Button className="bg-violet-500 hover:bg-violet-400 text-[#0b0b0d] font-medium rounded-lg h-8 px-4 text-[13px] transition-colors border-0">
+                        <Button className="bg-indigo-500 hover:bg-indigo-400 text-[#0b0b0d] font-medium rounded-lg h-8 px-4 text-[13px] transition-colors border-0">
                             Get started
                         </Button>
                     </Link>
