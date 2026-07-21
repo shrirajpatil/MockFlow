@@ -74,7 +74,7 @@ export default function SharePage() {
     if (loading) {
         return (
             <div className="min-h-screen bg-[#0b0b0d] flex items-center justify-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-400" />
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-400" />
             </div>
         );
     }
@@ -83,15 +83,15 @@ export default function SharePage() {
         return (
             <div className="min-h-screen bg-[#0b0b0d] text-white flex items-center justify-center px-6">
                 <div className="text-center max-w-md">
-                    <div className="w-16 h-16 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center mx-auto mb-6">
-                        <Zap className="w-8 h-8 text-violet-400" />
+                    <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mx-auto mb-6">
+                        <Zap className="w-8 h-8 text-indigo-400" />
                     </div>
                     <h1 className="text-lg font-semibold mb-2">Not available</h1>
                     <p className="text-white/40 text-sm mb-6">
                         This mock either doesn&apos;t exist or hasn&apos;t been deployed. Share links only work for deployed endpoints.
                     </p>
                     <Link href="/">
-                        <Button className="bg-violet-500 hover:bg-violet-400 text-[#0b0b0d] border-0">
+                        <Button className="bg-indigo-500 hover:bg-indigo-400 text-[#0b0b0d] border-0">
                             <ArrowLeft className="w-4 h-4 mr-2" />
                             Go to MockFlow
                         </Button>
@@ -106,7 +106,7 @@ export default function SharePage() {
             <div className="hairline-b border-b bg-[#0b0b0d]/90 backdrop-blur-xl sticky top-0 z-10">
                 <div className="max-w-3xl mx-auto px-6 py-5 flex items-center justify-between">
                     <Link href="/" className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 rounded-lg bg-violet-500 flex items-center justify-center">
+                        <div className="w-7 h-7 rounded-lg bg-indigo-500 flex items-center justify-center">
                             <Zap className="w-3.5 h-3.5 text-[#0b0b0d]" />
                         </div>
                         <span className="font-semibold text-sm tracking-tight">MockFlow</span>
@@ -185,7 +185,7 @@ export default function SharePage() {
                 </div>
 
                 <p className="text-center text-xs text-white/25 pt-6">
-                    Built with <Link href="/" className="text-violet-400 hover:text-violet-300">MockFlow</Link> — visual mock API builder.
+                    Built with <Link href="/" className="text-indigo-400 hover:text-indigo-300">MockFlow</Link> — visual mock API builder.
                 </p>
             </div>
         </div>

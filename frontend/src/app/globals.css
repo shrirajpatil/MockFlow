@@ -28,6 +28,9 @@
   --color-card: hsl(var(--card));
   --color-card-foreground: hsl(var(--card-foreground));
 
+  --color-highlight: hsl(var(--highlight));
+  --color-highlight-foreground: hsl(var(--highlight-foreground));
+
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
@@ -36,6 +39,19 @@
   --animate-accordion-up: accordion-up 0.2s ease-out;
   --animate-blob: blob 7s infinite;
   --animate-pulse-slow: pulse-slow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-fade-in-up: fade-in-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 
   @keyframes accordion-down {
     from {
@@ -97,8 +113,11 @@
   /* MockFlow "precision dark" theme — a near-neutral black rather than a
      saturated navy, so surfaces read as a considered dev-tool UI (Vercel /
      Linear / Railway territory) instead of a templated purple-gradient
-     landing page. Violet stays the ONE accent, used deliberately rather
-     than on every icon badge. */
+     landing page. Indigo is the ONE structural accent, used deliberately
+     rather than on every icon badge; amber ("highlight") is a second,
+     rarer warm accent reserved for a handful of genuinely special moments
+     (a badge, a single CTA) so it still reads as intentional next to a
+     cool, neutral base instead of a generic two-purple gradient. */
   --background: 240 8% 5%;
   /* #0b0b0d */
   --foreground: 210 20% 96%;
@@ -109,9 +128,9 @@
   --popover: 240 8% 8%;
   --popover-foreground: 210 20% 96%;
 
-  --primary: 255 92% 76%;
-  /* Violet 400 — brighter, single accent */
-  --primary-foreground: 240 10% 6%;
+  --primary: 234 89% 74%;
+  /* Indigo 400 — brighter, single structural accent */
+  --primary-foreground: 234 40% 8%;
 
   --secondary: 240 6% 15%;
   --secondary-foreground: 210 20% 96%;
@@ -119,7 +138,7 @@
   --muted: 240 6% 13%;
   --muted-foreground: 220 9% 62%;
 
-  --accent: 255 60% 18%;
+  --accent: 234 55% 19%;
   --accent-foreground: 210 20% 96%;
 
   --destructive: 0 72% 58%;
@@ -128,9 +147,13 @@
   --border: 240 6% 18%;
   --input: 240 6% 18%;
 
-  --ring: 255 92% 76%;
+  --ring: 234 89% 74%;
 
-  --radius: 0.625rem;
+  --highlight: 38 92% 58%;
+  /* Amber 400 — rare warm accent, not a structural color */
+  --highlight-foreground: 22 45% 9%;
+
+  --radius: 0.75rem;
 
   /* Surface tokens for the marketing/editor chrome (used directly in
      className strings, not just via shadcn primitives) so every page pulls
@@ -143,6 +166,11 @@
   /* nested/hover surface */
   --hairline: rgba(255, 255, 255, 0.08);
   --hairline-strong: rgba(255, 255, 255, 0.14);
+
+  /* Soft, low-contrast elevation — one shadow depth used everywhere a
+     surface needs to lift off the page, so depth stays consistent instead
+     of every component inventing its own blur/spread. */
+  --shadow-elevated: 0 1px 2px rgba(0, 0, 0, 0.45), 0 12px 32px -12px rgba(0, 0, 0, 0.55);
 }
 
 .light {
@@ -176,7 +204,8 @@
   .surface-card {
     background-color: var(--surface-1);
     border: 1px solid var(--hairline);
-    border-radius: 0.875rem;
+    border-radius: 1rem;
+    box-shadow: var(--shadow-elevated);
     transition: border-color 0.2s ease, background-color 0.2s ease;
   }
 
@@ -187,7 +216,7 @@
   .surface-raised {
     background-color: var(--surface-2);
     border: 1px solid var(--hairline);
-    border-radius: 0.625rem;
+    border-radius: 0.75rem;
   }
 
   .hairline-border {
@@ -205,7 +234,7 @@
   /* One restrained ambient glow, used at most once per page (e.g. behind a
      hero) — not layered three-deep the way a template landing page would. */
   .ambient-glow {
-    background: radial-gradient(circle, rgba(167, 139, 250, 0.16) 0%, rgba(167, 139, 250, 0) 65%);
+    background: radial-gradient(circle, rgba(129, 140, 248, 0.18) 0%, rgba(129, 140, 248, 0) 65%);
   }
 
   .bg-grid-faint {

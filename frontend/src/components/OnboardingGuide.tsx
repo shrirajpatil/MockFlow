@@ -29,16 +29,16 @@ export default function OnboardingGuide({ open, onClose }: OnboardingGuideProps)
         {
             title: 'Welcome to MockFlow',
             description: 'Design, test, and deploy mock APIs. No backend code required',
-            icon: <Rocket className="w-12 h-12 text-violet-400" />,
+            icon: <Rocket className="w-12 h-12 text-indigo-400" />,
             content: (
                 <div className="space-y-4">
                     <p className="text-white/60">
                         Build API endpoints visually by connecting nodes on a canvas, then deploy them to a real,
                         callable URL in one click.
                     </p>
-                    <div className="bg-violet-500/10 border border-violet-500/20 rounded-lg p-4">
-                        <h4 className="font-semibold text-violet-200 mb-2">The 4-step flow:</h4>
-                        <ul className="space-y-2 text-sm text-violet-300/80">
+                    <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-lg p-4">
+                        <h4 className="font-semibold text-indigo-200 mb-2">The 4-step flow:</h4>
+                        <ul className="space-y-2 text-sm text-indigo-300/80">
                             <li className="flex items-start gap-2">
                                 <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0" />
                                 <span><strong>Build</strong>: drag nodes onto the canvas and connect them</span>
@@ -63,19 +63,19 @@ export default function OnboardingGuide({ open, onClose }: OnboardingGuideProps)
         {
             title: 'Step 1: Build a workflow',
             description: 'Every workflow starts with a Request node and ends with a Response node',
-            icon: <MousePointerClick className="w-12 h-12 text-violet-500" />,
+            icon: <MousePointerClick className="w-12 h-12 text-indigo-500" />,
             content: (
                 <div className="space-y-4">
-                    <div className="bg-violet-500/10 border border-violet-500/20 rounded-lg p-4">
-                        <h4 className="font-semibold text-violet-200 mb-1">The only two you need to start</h4>
+                    <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-lg p-4">
+                        <h4 className="font-semibold text-indigo-200 mb-1">The only two you need to start</h4>
                         <p className="text-xs text-white/40 mb-3">Every workflow is just these two, connected.</p>
                         <div className="grid grid-cols-2 gap-3 text-sm">
                             <div className="surface-raised p-3">
-                                <div className="font-medium text-violet-300">Request</div>
+                                <div className="font-medium text-indigo-300">Request</div>
                                 <div className="text-xs text-white/40 mt-1">Defines the method + path that triggers this workflow</div>
                             </div>
                             <div className="surface-raised p-3">
-                                <div className="font-medium text-violet-300">Response</div>
+                                <div className="font-medium text-indigo-300">Response</div>
                                 <div className="text-xs text-white/40 mt-1">What gets sent back: status code + JSON body</div>
                             </div>
                         </div>
@@ -132,8 +132,8 @@ export default function OnboardingGuide({ open, onClose }: OnboardingGuideProps)
                             </div>
                         </div>
                     </div>
-                    <div className="bg-violet-500/10 border border-violet-500/20 rounded-lg p-3">
-                        <p className="text-sm text-violet-300">
+                    <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-lg p-3">
+                        <p className="text-sm text-indigo-300">
                             🔌 <strong>Testing an API on your own computer?</strong> The cloud can&apos;t reach
                             <code className="bg-black/20 px-1 rounded mx-1">localhost</code>
                             directly. Click <strong>Local APIs</strong> in the toolbar to connect one, no signup needed.
@@ -169,7 +169,7 @@ export default function OnboardingGuide({ open, onClose }: OnboardingGuideProps)
                         <div className="flex flex-col sm:flex-row gap-3 justify-center">
                             <Button
                                 onClick={startWithTemplate}
-                                className="bg-violet-500 hover:bg-violet-400 text-[#0b0b0d] border-0"
+                                className="bg-indigo-500 hover:bg-indigo-400 text-[#0b0b0d] border-0"
                             >
                                 <Sparkles className="w-4 h-4 mr-2" />
                                 Start with a template
@@ -207,7 +207,7 @@ export default function OnboardingGuide({ open, onClose }: OnboardingGuideProps)
                         {steps.map((_, i) => (
                             <div
                                 key={i}
-                                className={`h-2 w-2 rounded-full transition-all ${i === step ? 'bg-violet-400 w-8' : 'bg-white/15'}`}
+                                className={`h-2 w-2 rounded-full transition-all ${i === step ? 'bg-indigo-400 w-8' : 'bg-white/15'}`}
                             />
                         ))}
                     </div>
@@ -221,7 +221,7 @@ export default function OnboardingGuide({ open, onClose }: OnboardingGuideProps)
                         {step < steps.length - 1 && (
                             <Button
                                 onClick={() => setStep(step + 1)}
-                                className="bg-violet-500 hover:bg-violet-400 text-[#0b0b0d] border-0"
+                                className="bg-indigo-500 hover:bg-indigo-400 text-[#0b0b0d] border-0"
                             >
                                 Next
                             </Button>

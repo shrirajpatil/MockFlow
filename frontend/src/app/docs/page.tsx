@@ -12,12 +12,12 @@ export const metadata: Metadata = {
 };
 
 function Code({ children }: { children: React.ReactNode }) {
-    return <code className="bg-white/10 text-violet-200 px-1.5 py-0.5 rounded text-[0.85em] font-mono">{children}</code>;
+    return <code className="bg-white/10 text-indigo-200 px-1.5 py-0.5 rounded text-[0.85em] font-mono">{children}</code>;
 }
 
 function Pre({ children }: { children: React.ReactNode }) {
     return (
-        <pre className="bg-black/30 border border-white/10 rounded-lg p-4 text-xs sm:text-sm overflow-x-auto text-violet-100 font-mono">
+        <pre className="bg-black/30 border border-white/10 rounded-lg p-4 text-xs sm:text-sm overflow-x-auto text-indigo-100 font-mono">
             {children}
         </pre>
     );
@@ -92,8 +92,8 @@ export default function DocsPage() {
             <SiteHeader />
 
             <main className="max-w-3xl mx-auto px-6 py-16">
-                <p className="text-xs font-semibold text-violet-400 uppercase tracking-wider mb-3">Documentation</p>
-                <h1 className="text-4xl font-bold mb-4 bg-gradient-to-b from-white to-violet-200 bg-clip-text text-transparent">
+                <p className="text-xs font-semibold text-indigo-400 uppercase tracking-wider mb-3">Documentation</p>
+                <h1 className="text-4xl font-bold mb-4 bg-gradient-to-b from-white to-indigo-200 bg-clip-text text-transparent">
                     Build a mock API with MockFlow
                 </h1>
                 <p className="text-lg text-white/55 mb-8 leading-relaxed">
@@ -114,15 +114,15 @@ export default function DocsPage() {
                     <h2 className="text-2xl font-semibold mb-4 text-white">Quickstart</h2>
                     <ol className="space-y-4">
                         <li className="flex gap-3">
-                            <span className="shrink-0 w-6 h-6 rounded-full bg-violet-500/15 border border-violet-500/25 text-violet-300 text-xs font-bold flex items-center justify-center">1</span>
+                            <span className="shrink-0 w-6 h-6 rounded-full bg-indigo-500/15 border border-indigo-500/25 text-indigo-300 text-xs font-bold flex items-center justify-center">1</span>
                             <p className="text-white/60">
-                                Open the <Link href="/editor" className="text-violet-300 hover:text-white underline underline-offset-2">Editor</Link> and
+                                Open the <Link href="/editor" className="text-indigo-300 hover:text-white underline underline-offset-2">Editor</Link> and
                                 drag a <strong className="text-white">Request</strong> node onto the canvas, or click <strong className="text-white">Templates</strong> to
                                 start from a working example.
                             </p>
                         </li>
                         <li className="flex gap-3">
-                            <span className="shrink-0 w-6 h-6 rounded-full bg-violet-500/15 border border-violet-500/25 text-violet-300 text-xs font-bold flex items-center justify-center">2</span>
+                            <span className="shrink-0 w-6 h-6 rounded-full bg-indigo-500/15 border border-indigo-500/25 text-indigo-300 text-xs font-bold flex items-center justify-center">2</span>
                             <p className="text-white/60">
                                 Add the nodes your logic needs (Validation, Transformation, Conditional, State) and
                                 finish with a <strong className="text-white">Response</strong> node. Connect them by dragging from the dot on a node&apos;s
@@ -130,14 +130,14 @@ export default function DocsPage() {
                             </p>
                         </li>
                         <li className="flex gap-3">
-                            <span className="shrink-0 w-6 h-6 rounded-full bg-violet-500/15 border border-violet-500/25 text-violet-300 text-xs font-bold flex items-center justify-center">3</span>
+                            <span className="shrink-0 w-6 h-6 rounded-full bg-indigo-500/15 border border-indigo-500/25 text-indigo-300 text-xs font-bold flex items-center justify-center">3</span>
                             <p className="text-white/60">
                                 Click <strong className="text-white">Test</strong> to run it in the browser with the exact engine that will serve
                                 production traffic. No deploy is required to iterate.
                             </p>
                         </li>
                         <li className="flex gap-3">
-                            <span className="shrink-0 w-6 h-6 rounded-full bg-violet-500/15 border border-violet-500/25 text-violet-300 text-xs font-bold flex items-center justify-center">4</span>
+                            <span className="shrink-0 w-6 h-6 rounded-full bg-indigo-500/15 border border-indigo-500/25 text-indigo-300 text-xs font-bold flex items-center justify-center">4</span>
                             <p className="text-white/60">
                                 Click <strong className="text-white">Save</strong>, then <strong className="text-white">Deploy</strong>. You&apos;ll get a live URL in the shape{' '}
                                 <Code>/api/{'{workspace}'}/{'{path}'}</Code> that you, or anyone with the link, can call with curl.
@@ -160,7 +160,7 @@ export default function DocsPage() {
                                 <dl className="grid sm:grid-cols-2 gap-x-6 gap-y-2">
                                     {node.fields.map(([field, desc]) => (
                                         <div key={field} className="text-xs">
-                                            <dt className="font-mono text-violet-300 mb-0.5">{field}</dt>
+                                            <dt className="font-mono text-indigo-300 mb-0.5">{field}</dt>
                                             <dd className="text-white/45">{desc}</dd>
                                         </div>
                                     ))}
@@ -191,9 +191,9 @@ export default function DocsPage() {
                     <div className="mt-3">
                         <Pre>
                             {'{'}
-                            {'\n  '}<span className="text-violet-300">&quot;status&quot;</span>: <span className="text-emerald-300">&quot;success&quot;</span>,
-                            {'\n  '}<span className="text-violet-300">&quot;user&quot;</span>: <span className="text-emerald-300">&quot;{'{{'}request.body.name{'}}'}&quot;</span>,
-                            {'\n  '}<span className="text-violet-300">&quot;views&quot;</span>: <span className="text-emerald-300">&quot;{'{{'}state.count{'}}'}&quot;</span>
+                            {'\n  '}<span className="text-indigo-300">&quot;status&quot;</span>: <span className="text-emerald-300">&quot;success&quot;</span>,
+                            {'\n  '}<span className="text-indigo-300">&quot;user&quot;</span>: <span className="text-emerald-300">&quot;{'{{'}request.body.name{'}}'}&quot;</span>,
+                            {'\n  '}<span className="text-indigo-300">&quot;views&quot;</span>: <span className="text-emerald-300">&quot;{'{{'}state.count{'}}'}&quot;</span>
                             {'\n'}{'}'}
                         </Pre>
                     </div>
@@ -206,7 +206,7 @@ export default function DocsPage() {
                         (Netlify Functions + Supabase). The URL shape is:
                     </p>
                     <Pre>
-                        https://mockito.netlify.app/api/<span className="text-violet-300">{'{workspace}'}</span>/<span className="text-violet-300">{'{path}'}</span>
+                        https://mockito.netlify.app/api/<span className="text-indigo-300">{'{workspace}'}</span>/<span className="text-indigo-300">{'{path}'}</span>
                     </Pre>
                     <p className="text-white/55 mt-4 leading-relaxed">
                         <strong className="text-white">Workspace</strong> is an unauthenticated namespace generated automatically for your
@@ -224,7 +224,7 @@ export default function DocsPage() {
                         the editor toolbar to connect one. No signup is needed:
                     </p>
                     <Pre>
-                        <span className="text-sky-300">ssh</span> <span className="text-amber-300">-R</span> 80:localhost:<span className="text-violet-300">{'{your-port}'}</span> <span className="text-emerald-300">localhost.run</span>
+                        <span className="text-sky-300">ssh</span> <span className="text-amber-300">-R</span> 80:localhost:<span className="text-indigo-300">{'{your-port}'}</span> <span className="text-emerald-300">localhost.run</span>
                     </Pre>
                     <p className="text-white/55 mt-4 leading-relaxed">
                         Run that in a terminal (SSH ships with macOS, Linux, and Windows 10+), copy the URL it prints,
@@ -245,7 +245,7 @@ export default function DocsPage() {
                     <h2 className="text-xl font-semibold text-white mb-2">Ready to try it?</h2>
                     <p className="text-white/55 mb-5">Open the editor and load a template. You&apos;ll have a live endpoint in under a minute.</p>
                     <Link href="/editor">
-                        <span className="inline-flex items-center gap-2 h-11 px-6 rounded-xl bg-violet-500 hover:bg-violet-400 text-[#0b0b0d] font-medium text-sm transition-colors">
+                        <span className="inline-flex items-center gap-2 h-11 px-6 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-[#0b0b0d] font-medium text-sm transition-colors">
                             Open the Editor
                             <ArrowRight className="w-4 h-4" />
                         </span>

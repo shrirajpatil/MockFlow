@@ -8,7 +8,7 @@ export default function SiteFooter() {
                 <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-10 pb-10">
                     <div>
                         <Link href="/" className="flex items-center gap-2.5 mb-3">
-                            <div className="w-7 h-7 rounded-md bg-violet-500 flex items-center justify-center">
+                            <div className="w-7 h-7 rounded-md bg-indigo-500 flex items-center justify-center">
                                 <Zap className="w-3.5 h-3.5 text-[#0b0b0d]" />
                             </div>
                             <span className="font-semibold text-white text-sm">MockFlow</span>

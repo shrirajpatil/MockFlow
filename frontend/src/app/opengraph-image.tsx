@@ -18,7 +18,7 @@ export default function OpengraphImage() {
                     justifyContent: 'center',
                     backgroundColor: '#0a0d1a',
                     backgroundImage:
-                        'radial-gradient(circle at 25% 20%, rgba(139,92,246,0.35) 0%, rgba(139,92,246,0) 45%), radial-gradient(circle at 80% 70%, rgba(99,102,241,0.3) 0%, rgba(99,102,241,0) 45%)',
+                        'radial-gradient(circle at 25% 20%, rgba(99,102,241,0.35) 0%, rgba(99,102,241,0) 45%), radial-gradient(circle at 80% 70%, rgba(245,158,11,0.16) 0%, rgba(245,158,11,0) 45%)',
                     fontFamily: 'sans-serif',
                 }}
             >
@@ -38,7 +38,7 @@ export default function OpengraphImage() {
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            background: 'linear-gradient(135deg, #6366f1, #8b5cf6, #9333ea)',
+                            background: 'linear-gradient(135deg, #818cf8, #6366f1, #4f46e5)',
                         }}
                     >
                         <svg width="44" height="44" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
